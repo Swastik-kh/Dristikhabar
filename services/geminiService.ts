@@ -1,29 +1,32 @@
 
-import { GoogleGenAI, Type, Modality } from "https://esm.sh/@google/genai@1.34.0";
+import { GoogleGenAI, Type, Modality } from "@google/genai";
 
-// Fix: Simplified initialization according to Google GenAI SDK guidelines
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 export async function rewriteNews(rawContent: string): Promise<{ title: string; content: string; summary: string }> {
   const ai = getAI();
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: `यस समाचारलाई व्यावसायिक र आकर्षक नेपाली भाषामा पुन: लेख्नुहोस्। शीर्षक र सारांश पनि समावेश गर्नुहोस्। JSON ढाँचामा दिनुहोस्।\n\nContent: ${rawContent}`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING },
-          content: { type: Type.STRING },
-          summary: { type: Type.STRING },
-        },
-        required: ["title", "content", "summary"]
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: `यस समाचारलाई व्यावसायिक र आकर्षक नेपाली भाषामा पुन: लेख्नुहोस्। शीर्षक र सारांश पनि समावेश गर्नुहोस्। JSON ढाँचामा दिनुहोस्।\n\nContent: ${rawContent}`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            content: { type: Type.STRING },
+            summary: { type: Type.STRING },
+          },
+          required: ["title", "content", "summary"]
+        }
       }
-    }
-  });
-
-  return JSON.parse(response.text || "{}");
+    });
+    return JSON.parse(response.text || "{}");
+  } catch (err) {
+    console.error("Rewrite failed", err);
+    return { title: '', content: rawContent, summary: '' };
+  }
 }
 
 export async function generateAudio(text: string): Promise<string | null> {

@@ -21,7 +21,7 @@
       @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 
-    <!-- Firebase SDK (Standard Implementation) -->
+    <!-- Firebase Global Initialization -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
       import * as authExports from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -36,30 +36,35 @@
         appId: "1:905774533816:web:bfaf49a1b3bf744f88384d"
       };
 
-      const app = initializeApp(firebaseConfig);
-      window.fbAuth = authExports.getAuth(app);
-      window.fbDb = firestoreExports.getFirestore(app);
-      window.fbAuthMethods = authExports;
-      window.fbFirestoreMethods = firestoreExports;
-      
-      firestoreExports.enableIndexedDbPersistence(window.fbDb).catch(() => {});
+      try {
+        const app = initializeApp(firebaseConfig);
+        window.fbAuth = authExports.getAuth(app);
+        window.fbDb = firestoreExports.getFirestore(app);
+        window.fbAuthMethods = authExports;
+        window.fbFirestoreMethods = firestoreExports;
+        firestoreExports.enableIndexedDbPersistence(window.fbDb).catch(() => {});
+      } catch (e) {
+        console.error("Firebase init failed", e);
+      }
     </script>
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0",
     "recharts": "https://esm.sh/recharts@^3.6.0",
     "vite": "https://esm.sh/vite@^7.3.0",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
   }
 }
 </script>
 </head>
   <body class="bg-gray-50 text-gray-900">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Note: Vite expects relative path to index.tsx -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
