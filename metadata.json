@@ -1,5 +1,5 @@
 {
-  "name": "दृष्टि खबर (Drishti Khabar) - Production1",
+  "name": "दृष्टि खबर (Drishti Khabar) - Deployed",
   "description": "Professional Nepali News Portal optimized for Vercel deployment with Bikram Sambat integration, AI-powered audio, and video support.",
   "requestFramePermissions": [
     "camera",
