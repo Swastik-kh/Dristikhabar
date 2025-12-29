@@ -44,7 +44,6 @@ const HomePage: React.FC = () => {
     fetchNewsAndSettings();
   }, []);
 
-  // Limit breaking news to the top 3 most recent items
   const breakingNews = publishedNews.filter(news => news.isBreaking).slice(0, 3);
   const isCategoryPage = id !== undefined;
 
@@ -65,12 +64,10 @@ const HomePage: React.FC = () => {
   }
   
   const mukhyaSamachar = displayNews.length > 0 ? displayNews[0] : null;
-  const latestUpdates = displayNews.filter(n => n.id !== (mukhyaSamachar?.id)).slice(0, 12);
+  const latestUpdates = displayNews.filter(n => n.id !== (mukhyaSamachar?.id)).slice(0, 15);
 
   const renderAdBanner = (adSettings: any, label: string) => {
     if (!adSettings) return null;
-    
-    // Logic to check if ad is truly empty
     const isEmpty = !adSettings.mediaUrl && (!adSettings.titleText || adSettings.titleText.trim() === '');
     if (isEmpty) return null;
 
@@ -133,47 +130,70 @@ const HomePage: React.FC = () => {
             <h2 className="text-4xl font-black text-slate-900">{categoryLabel}</h2>
             <div className="h-1 flex-1 bg-slate-100 rounded-full"><div className="h-full w-24 bg-red-700 rounded-full"></div></div>
           </div>
-          {displayNews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-              {displayNews.map(news => <NewsCard key={news.id} news={news} />)}
-            </div>
-          ) : (
-            <div className="bg-white p-32 text-center rounded-[3rem] border-4 border-dashed border-slate-100 text-slate-300 font-black uppercase tracking-widest">समाचार फेला परेन।</div>
-          )}
+          <div className="max-w-5xl">
+            {displayNews.length > 0 ? (
+              <div className="flex flex-col">
+                {displayNews.map(news => <NewsCard key={news.id} news={news} />)}
+              </div>
+            ) : (
+              <div className="bg-white p-32 text-center rounded-[3rem] border-4 border-dashed border-slate-100 text-slate-300 font-black uppercase tracking-widest">समाचार फेला परेन।</div>
+            )}
+          </div>
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-16">
-            <div className="lg:col-span-8">
-              <div className="flex items-center gap-4 mb-8">
-                <h2 className="text-3xl font-black text-slate-900 shrink-0">मुख्य समाचार</h2>
-                <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full w-32 bg-red-700"></div></div>
-              </div>
-              {mukhyaSamachar ? (
-                <Link to={`/news/${mukhyaSamachar.slug || mukhyaSamachar.id}`} className="relative block rounded-[2.5rem] overflow-hidden mb-12 shadow-2xl group">
-                  <div className="aspect-video bg-slate-200"><img src={mukhyaSamachar.featuredImage} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" /></div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-8 md:p-12 flex flex-col justify-end">
-                     <span className="bg-red-700 text-white text-[10px] font-black px-3 py-1 rounded-full w-fit mb-4 uppercase tracking-widest">{mukhyaSamachar.category}</span>
-                     <h1 className="text-white text-3xl md:text-5xl font-black leading-tight group-hover:text-red-400 transition-colors drop-shadow-2xl">{mukhyaSamachar.title}</h1>
-                     <div className="mt-6 flex items-center gap-6 text-white/70 text-sm font-black uppercase tracking-widest">
-                       <span className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-[10px]">{mukhyaSamachar.authorName?.charAt(0)}</div>{mukhyaSamachar.authorName}</span>
-                       <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span><span>ताजा अपडेट</span>
-                     </div>
-                  </div>
-                </Link>
-              ) : null}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">{latestUpdates.map(news => <NewsCard key={news.id} news={news} />)}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-16">
+          <div className="lg:col-span-8">
+            <div className="flex items-center gap-4 mb-8">
+              <h2 className="text-3xl font-black text-slate-900 shrink-0">मुख्य समाचार</h2>
+              <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full w-32 bg-red-700"></div></div>
             </div>
-            <div className="lg:col-span-4">
-               <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-slate-50 sticky top-28">
-                  <div className="flex items-center justify-between mb-8"><h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">लोकप्रिय</h3><div className="h-px flex-1 bg-slate-100 mx-4"></div></div>
-                  <div className="space-y-8">{publishedNews.slice(0, 10).map(news => <NewsCard key={news.id} news={news} horizontal />)}</div>
-               </div>
+            
+            {mukhyaSamachar ? (
+              <Link to={`/news/${mukhyaSamachar.slug || mukhyaSamachar.id}`} className="relative block rounded-[2.5rem] overflow-hidden mb-12 shadow-2xl group">
+                <div className="aspect-video bg-slate-200">
+                  <img src={mukhyaSamachar.featuredImage} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-8 md:p-12 flex flex-col justify-end">
+                   <span className="bg-red-700 text-white text-[10px] font-black px-3 py-1 rounded-full w-fit mb-4 uppercase tracking-widest">{mukhyaSamachar.category}</span>
+                   <h1 className="text-white text-3xl md:text-5xl font-black leading-tight group-hover:text-red-400 transition-colors drop-shadow-2xl">{mukhyaSamachar.title}</h1>
+                   <div className="mt-6 flex items-center gap-6 text-white/70 text-sm font-black uppercase tracking-widest">
+                     <span className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-[10px]">{mukhyaSamachar.authorName?.charAt(0)}</div>{mukhyaSamachar.authorName}</span>
+                     <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span><span>ताजा अपडेट</span>
+                   </div>
+                </div>
+              </Link>
+            ) : null}
+
+            {/* List Layout for Latest Updates as per reference image */}
+            <div className="flex flex-col">
+              {latestUpdates.map(news => <NewsCard key={news.id} news={news} />)}
             </div>
           </div>
-          {renderAdBanner(bottomAd, 'SPONSORED BOTTOM')}
-        </>
+
+          <div className="lg:col-span-4">
+             <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-slate-50 sticky top-28">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">लोकप्रिय</h3>
+                  <div className="h-px flex-1 bg-slate-100 mx-4"></div>
+                </div>
+                <div className="space-y-8">
+                  {publishedNews.slice(0, 8).map(news => (
+                    <Link key={news.id} to={`/news/${news.slug || news.id}`} className="flex gap-4 group items-start">
+                      <div className="relative shrink-0 w-24 h-16 overflow-hidden rounded-lg bg-slate-100">
+                        <img src={news.featuredImage || 'logo.png'} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold leading-tight group-hover:text-red-700 line-clamp-2 transition-colors font-mukta">{news.title}</h4>
+                        <p className="text-[10px] font-black text-slate-400 mt-1 uppercase">{news.category}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+             </div>
+          </div>
+        </div>
       )}
+      {renderAdBanner(bottomAd, 'SPONSORED BOTTOM')}
     </main>
   );
 };

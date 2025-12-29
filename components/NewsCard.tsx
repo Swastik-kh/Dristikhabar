@@ -12,93 +12,80 @@ const NewsCard: React.FC<Props> = ({ news, horizontal = false }) => {
   const shouldShowAuthorName = news.showAuthorName === undefined ? true : news.showAuthorName;
   const newsLink = `/news/${news.slug || news.id}`;
 
-  // Smart Thumbnail Detection
   const getThumbnail = () => {
     if (news.featuredImage) return news.featuredImage;
-    
-    // Check for YouTube Thumbnail
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const ytMatch = news.videoUrl?.match(youtubeRegex);
-    if (ytMatch) {
-      return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
-    }
-
+    if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
     return 'logo.png';
   };
 
   const thumbnail = getThumbnail();
 
-  if (horizontal) {
-    return (
-      <Link to={newsLink} className="flex gap-4 group items-start">
-        <div className="relative shrink-0 w-32 h-20 overflow-hidden rounded-xl shadow-sm border border-slate-100 bg-slate-100">
-          <img 
-            src={thumbnail} 
-            alt={news.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            onError={(e) => (e.currentTarget.src = 'logo.png')}
-          />
-          {news.isBreaking && (
-            <span className="absolute top-1 left-1 bg-red-600 w-2.5 h-2.5 rounded-full border-2 border-white animate-ping"></span>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <span className="text-red-600 text-[9px] font-black uppercase tracking-widest">{news.category}</span>
-          <h3 className="text-sm font-bold leading-tight group-hover:text-red-700 line-clamp-2 transition-colors mt-1 font-mukta">
-            {news.title}
-          </h3>
-          <p className="text-gray-400 text-[10px] mt-1 font-bold flex items-center gap-1">
-             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-             ताजा अपडेट
-          </p>
-        </div>
-      </Link>
-    );
-  }
-
+  // Primary list style as requested (Image on right, text on left)
   return (
-    <Link to={newsLink} className="block group">
-      <div className="overflow-hidden rounded-2xl mb-4 relative shadow-sm group-hover:shadow-xl transition-all duration-500 border border-slate-100 aspect-video bg-slate-100">
-        <img 
-          src={thumbnail} 
-          alt={news.title}
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-          onError={(e) => (e.currentTarget.src = 'logo.png')}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        {news.isBreaking && (
-           <div className="absolute top-3 left-3 bg-red-700 text-white text-[9px] font-black px-2 py-1 rounded uppercase tracking-tighter shadow-lg border border-red-500">TAJA</div>
-        )}
-        {news.videoUrl && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 shadow-2xl">
-              <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-            </div>
+    <div className="group py-8 border-b border-slate-100 last:border-0">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+        {/* Left Content */}
+        <div className="flex-1 order-2 md:order-1">
+          <Link to={newsLink} className="block group">
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-2 group-hover:text-red-700 transition-colors font-mukta">
+              {news.title}
+            </h2>
+          </Link>
+
+          {shouldShowAuthorName && news.authorName && (
+            <p className="text-slate-400 text-sm font-bold mb-3 flex items-center gap-1">
+              {news.authorName}
+            </p>
+          )}
+
+          <Link to={newsLink} className="block">
+            <p className="text-slate-600 text-base md:text-lg font-medium leading-relaxed line-clamp-3 mb-6">
+              {news.summary}
+            </p>
+          </Link>
+
+          {/* Action Icons like in the reference image */}
+          <div className="flex items-center gap-6 text-slate-500">
+            <button className="flex items-center gap-2 hover:text-red-700 transition-colors group/action">
+              <svg className="w-5 h-5 group-hover/action:fill-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              <span className="text-xs font-black uppercase tracking-widest">संग्रह</span>
+            </button>
+            <button className="flex items-center gap-2 hover:text-red-700 transition-colors group/action">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              <span className="text-xs font-black uppercase tracking-widest">सेयर</span>
+            </button>
           </div>
-        )}
+        </div>
+
+        {/* Right Image */}
+        <Link to={newsLink} className="w-full md:w-[280px] shrink-0 order-1 md:order-2">
+          <div className="relative aspect-[16/10] md:aspect-[16/9] overflow-hidden rounded-xl bg-slate-100 shadow-sm border border-slate-50">
+            <img 
+              src={thumbnail} 
+              alt={news.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              onError={(e) => (e.currentTarget.src = 'logo.png')}
+            />
+            {news.isBreaking && (
+              <div className="absolute top-2 left-2 bg-red-700 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">TAJA</div>
+            )}
+            {news.videoUrl && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                  <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </div>
+              </div>
+            )}
+          </div>
+        </Link>
       </div>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest group-hover:bg-red-50 group-hover:text-red-700 transition-colors">{news.category}</span>
-      </div>
-      <h2 className="text-xl font-black leading-snug group-hover:text-red-700 transition-colors line-clamp-2 font-mukta h-[3.5rem]">
-        {news.title}
-      </h2>
-      <p className="text-gray-500 text-sm mt-2 line-clamp-2 font-medium opacity-80">
-        {news.summary}
-      </p>
-      <div className="mt-4 flex items-center justify-between text-xs font-bold text-slate-400">
-         {shouldShowAuthorName && news.authorName && (
-           <span className="flex items-center gap-1">
-             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-             {news.authorName}
-           </span>
-         )}
-         <span className="flex items-center gap-1 group-hover:text-red-700 transition-colors">
-           पुरा पढ्नुहोस्
-           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-         </span>
-      </div>
-    </Link>
+    </div>
   );
 };
 

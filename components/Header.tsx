@@ -78,16 +78,18 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
   return (
     <header className="bg-white">
       {/* Top Bar */}
-      <div className="bg-slate-950 text-white py-1.5 px-4 text-[10px] md:text-xs grid grid-cols-3 items-center relative z-30">
-        <div className="flex items-center gap-4">
-          <span className="font-black tracking-[0.1em] uppercase text-red-500 animate-pulse">LIVE</span>
-          <span className="font-bold tracking-wide text-slate-400 hidden sm:inline-block">{bsDate.formatted}</span>
+      <div className="bg-slate-950 text-white py-2 px-4 grid grid-cols-1 md:grid-cols-3 items-center relative z-30 gap-2 md:gap-0">
+        <div className="flex items-center gap-4 justify-center md:justify-start">
+          <span className="font-black tracking-[0.1em] uppercase text-red-500 animate-pulse text-[10px]">LIVE</span>
+          <span className="font-bold tracking-wide text-slate-400 text-[10px] md:text-xs">{bsDate.formatted}</span>
         </div>
         <div className="text-center">
-          <span className="font-black tracking-widest text-white uppercase text-[9px] md:text-[11px]">सत्य, तथ्य र निष्पक्ष समाचार</span>
+          <span className="font-black italic tracking-widest text-red-600 text-sm md:text-lg drop-shadow-[0_0_8px_rgba(220,38,38,0.3)]">
+            सत्य, तथ्य र निष्पक्ष समाचारको संवाहक
+          </span>
         </div>
-        <div className="flex justify-end items-center gap-4">
-          <Link to="/admin/login" className="text-white hover:text-red-400 transition-colors font-black uppercase text-[9px] tracking-widest">Login</Link>
+        <div className="flex justify-center md:justify-end items-center gap-4">
+          <Link to="/admin/login" className="text-slate-400 hover:text-white transition-colors font-black uppercase text-[9px] tracking-widest border border-slate-800 px-3 py-1 rounded-full">Login</Link>
         </div>
       </div>
 
@@ -114,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
       <div className={`bg-white border-b border-slate-100 shadow-xl transition-all duration-300 z-[100] ${isSticky ? 'fixed top-0 left-0 w-full animate-slideInDown' : 'relative'}`}>
         <div className="container mx-auto px-4 flex items-center h-14 md:h-18">
           
-          {/* Logo in Sticky Mode - Now visible! */}
+          {/* Logo in Sticky Mode */}
           <div className={`transition-all duration-500 flex items-center ${isSticky ? 'w-auto mr-6 opacity-100' : 'w-0 opacity-0 overflow-hidden'}`}>
             <Link to="/">
               <img src={siteLogo} alt="Logo" className="h-10 md:h-12 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).src = 'logo.png'; }} />
