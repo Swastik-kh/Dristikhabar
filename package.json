@@ -1,7 +1,8 @@
+
 {
-  "name": "दृष्टि-खबर-(drishti-khabar)---production1",
+  "name": "drishti-khabar",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,13 +11,14 @@
   },
   "dependencies": {
     "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-router-dom": "^7.11.0",
-    "recharts": "^3.6.0"
+    "@google/genai": "^1.34.0",
+    "lucide-react": "^0.454.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^5.2.0",
+    "typescript": "^5.4.0"
   }
 }
