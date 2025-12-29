@@ -7,7 +7,9 @@ import {
   onAuthStateChanged as firebaseOnAuth 
 } from "firebase/auth";
 import { 
-  getFirestore, 
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   collection as firestoreCollection, 
   doc as firestoreDoc, 
   query as firestoreQuery, 
@@ -21,8 +23,7 @@ import {
   addDoc as firestoreAddDoc,
   updateDoc as firestoreUpdateDoc,
   deleteDoc as firestoreDeleteDoc,
-  Timestamp as firestoreTimestamp,
-  enableIndexedDbPersistence
+  Timestamp as firestoreTimestamp
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -36,12 +37,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getFirebaseAuth(app);
-const db = getFirestore(app);
 
-// Enable offline persistence
-try {
-  enableIndexedDbPersistence(db).catch(() => {});
-} catch (e) {}
+// Use new local cache settings instead of deprecated enableIndexedDbPersistence
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 
 export const getAuth = () => auth;
 export const getDb = () => db;

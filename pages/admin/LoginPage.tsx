@@ -83,71 +83,59 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 font-mukta relative overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/20 rounded-full blur-[120px]"></div>
+      {/* Background elements */}
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-red-900/10 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-900/5 rounded-full blur-[120px]"></div>
       
-      {/* Subtle Pattern Overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-
-      <div className="max-w-[1000px] w-full bg-slate-900/50 backdrop-blur-2xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden border border-white/10 flex flex-col md:flex-row relative z-10">
+      {/* Login Card Container */}
+      <div className="max-w-[1000px] w-full bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden border border-white/10 flex flex-col md:flex-row relative z-10 animate-fadeIn">
         
-        {/* Left Side: Branding (Visible on Desktop) */}
-        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-red-700 to-red-900 p-12 flex-col justify-between relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-               <path d="M0 0 L100 0 L100 100 L0 100 Z" fill="none" stroke="white" strokeWidth="0.1" />
-               <path d="M0 20 L100 80 M0 80 L100 20" stroke="white" strokeWidth="0.05" />
-             </svg>
-          </div>
-          
+        {/* Modern Close Button */}
+        <Link 
+          to="/" 
+          className="absolute top-6 right-6 md:top-8 md:right-8 w-12 h-12 bg-white/5 hover:bg-red-700 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all duration-300 border border-white/5 z-50 group"
+          title="मुख्य पृष्ठमा फर्कनुहोस्"
+        >
+          <svg className="w-6 h-6 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </Link>
+
+        {/* Brand/Welcome Side */}
+        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-red-900 to-black p-16 flex-col justify-between">
           <div className="relative z-10">
-            <Link to="/" className="inline-block mb-8">
+            <Link to="/">
               <img 
                 src={siteLogo} 
                 alt="Logo" 
-                className="h-16 brightness-0 invert object-contain"
+                className="h-16 brightness-0 invert object-contain mb-12"
                 onError={(e) => (e.currentTarget.src = 'logo.png')}
               />
             </Link>
-            <h2 className="text-4xl font-black text-white leading-tight">सत्य र तथ्यको <br/><span className="text-red-200">अन्तिम गन्तव्य।</span></h2>
-            <p className="text-red-100/70 mt-4 font-bold text-lg">प्रशासनिक क्षेत्रमा पहुँचका लागि लगइन गर्नुहोस्।</p>
+            <h2 className="text-4xl lg:text-5xl font-black text-white leading-tight">
+              सत्य, तथ्य र <br/>
+              <span className="text-red-500 underline decoration-white/10 underline-offset-8">निष्पक्ष पत्रकारिता।</span>
+            </h2>
+            <p className="text-slate-400 mt-8 font-bold text-lg leading-relaxed">
+              दृष्टि खबरको प्रशासनिक प्यानलमा स्वागत छ। यहाँबाट तपाईं समाचार र वेबसाइट सेटिङ्गहरू व्यवस्थापन गर्न सक्नुहुन्छ।
+            </p>
           </div>
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center backdrop-blur-md">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2z" /></svg>
-              </div>
-              <p className="text-white/60 text-xs font-black uppercase tracking-widest">Secure Admin Access</p>
-            </div>
+          
+          <div className="text-slate-500 text-[10px] font-black tracking-widest uppercase">
+             Secure Panel &copy; २०८२
           </div>
         </div>
 
-        {/* Right Side: Login Form */}
-        <div className="w-full md:w-1/2 p-8 md:p-16 relative">
-          {/* Close Button Mobile/Desktop */}
-          <Link 
-            to="/" 
-            className="absolute top-8 right-8 w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-red-700 transition-all duration-300 border border-white/10 group"
-          >
-            <svg className="w-6 h-6 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </Link>
-
-          <div className="mb-12">
-            <div className="md:hidden mb-6">
-              <img src={siteLogo} className="h-12 brightness-0 invert" alt="Logo" />
-            </div>
-            <h1 className="text-3xl font-black text-white">स्वागत छ!</h1>
-            <p className="text-slate-500 font-bold mt-2">प्रशासन प्यानलमा जानको लागि विवरण भर्नुहोस्।</p>
+        {/* Login Form Side */}
+        <div className="w-full md:w-1/2 p-8 md:p-20 flex flex-col justify-center min-h-[500px]">
+          <div className="mb-10">
+            <h1 className="text-4xl font-black text-white">लगइन</h1>
+            <p className="text-slate-500 font-bold mt-2">प्यानल पहुँचका लागि विवरण भर्नुहोस्।</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-2xl text-xs font-black flex items-center gap-3 animate-headshake">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-xs font-black animate-shake">
                 {error}
               </div>
             )}
@@ -155,14 +143,11 @@ const LoginPage: React.FC = () => {
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-2">युजरनेम वा इमेल</label>
               <div className="relative">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                </div>
                 <input 
                   type="text" 
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  className="w-full bg-white/5 border-2 border-white/5 rounded-3xl py-5 pl-14 pr-6 text-white focus:outline-none focus:border-red-700 focus:bg-white/10 transition-all font-bold text-lg"
+                  className="w-full bg-white/5 border-2 border-white/5 rounded-2xl py-5 px-6 text-white focus:outline-none focus:border-red-700 focus:bg-white/10 transition-all font-bold text-lg"
                   placeholder="admin"
                   required
                 />
@@ -170,16 +155,13 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-2">गोप्य पासवर्ड</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-2">पासवर्ड</label>
               <div className="relative">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2z" /></svg>
-                </div>
                 <input 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 border-2 border-white/5 rounded-3xl py-5 pl-14 pr-6 text-white focus:outline-none focus:border-red-700 focus:bg-white/10 transition-all font-bold text-lg"
+                  className="w-full bg-white/5 border-2 border-white/5 rounded-2xl py-5 px-6 text-white focus:outline-none focus:border-red-700 focus:bg-white/10 transition-all font-bold text-lg"
                   placeholder="••••••••"
                   required
                 />
@@ -189,34 +171,24 @@ const LoginPage: React.FC = () => {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-red-700 hover:bg-red-600 text-white font-black py-5 rounded-3xl shadow-[0_10px_30px_rgba(220,38,38,0.3)] transition-all transform active:scale-95 flex items-center justify-center gap-3 text-xl"
+              className="w-full bg-red-700 hover:bg-red-600 text-white font-black py-5 rounded-2xl shadow-[0_20px_40px_rgba(220,38,38,0.25)] transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 text-xl mt-4 disabled:bg-slate-700"
             >
-              {isLoading ? <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div> : "प्यानलमा छिर्नुहोस्"}
+              {isLoading ? <div className="w-7 h-7 border-4 border-white border-t-transparent rounded-full animate-spin"></div> : "प्यानलमा जानुहोस्"}
             </button>
           </form>
-
-          <div className="mt-12 text-center">
-            <Link 
-              to="/" 
-              className="inline-flex items-center gap-2 text-slate-400 hover:text-white font-black uppercase tracking-widest text-xs transition-all hover:gap-4"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-              मुख्य समाचार पृष्ठमा फर्कनुहोस्
-            </Link>
-          </div>
         </div>
       </div>
 
       <style>{`
-        @keyframes headshake {
-          0% { transform: translateX(0); }
-          6.5% { transform: translateX(-6px) rotateY(-9deg); }
-          18.5% { transform: translateX(5px) rotateY(7deg); }
-          31.5% { transform: translateX(-3px) rotateY(-5deg); }
-          43.5% { transform: translateX(2px) rotateY(3deg); }
-          50% { transform: translateX(0); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.8s cubic-bezier(0, 0, 0.2, 1); }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
         }
-        .animate-headshake { animation: headshake 0.8s ease-in-out; }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
       `}</style>
     </div>
   );
