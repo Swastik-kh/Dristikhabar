@@ -132,7 +132,7 @@ const App: React.FC = () => {
             </div>
             
             <div className="pt-8 border-t border-slate-900 text-center text-slate-600 text-[10px] font-black tracking-[0.2em] uppercase">
-              &copy; २०८२ दृष्टि खबर मिडिया प्रा.लि. | सर्वाधिकार सुरक्षित | Design by AI Studio
+              &copy; २०८२ दृष्टि खबर मिडिया प्रा.लि. | सर्वाधिकार सुरक्षित
             </div>
           </div>
         </footer>
