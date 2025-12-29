@@ -1,60 +1,68 @@
 
-/**
- * ROBUST FIREBASE BRIDGE SERVICE
- * Directly accesses Firebase instances and methods from the global window object.
- */
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth as getFirebaseAuth, 
+  signInWithEmailAndPassword as firebaseSignIn, 
+  signOut as firebaseSignOut, 
+  onAuthStateChanged as firebaseOnAuth 
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection as firestoreCollection, 
+  doc as firestoreDoc, 
+  query as firestoreQuery, 
+  where as firestoreWhere, 
+  orderBy as firestoreOrderBy, 
+  limit as firestoreLimit, 
+  increment as firestoreIncrement,
+  getDoc as firestoreGetDoc,
+  getDocs as firestoreGetDocs,
+  setDoc as firestoreSetDoc,
+  addDoc as firestoreAddDoc,
+  updateDoc as firestoreUpdateDoc,
+  deleteDoc as firestoreDeleteDoc,
+  Timestamp as firestoreTimestamp,
+  enableIndexedDbPersistence
+} from "firebase/firestore";
 
-const getGlobal = (key: string) => {
-  return (window as any)[key] || null;
+const firebaseConfig = {
+  apiKey: "AIzaSyBFrJOmRsuP7WwSb1oD1fYSYvBcDJVSNfQ",
+  authDomain: "dristi-khabar.firebaseapp.com",
+  projectId: "dristi-khabar",
+  storageBucket: "dristi-khabar.firebasestorage.app",
+  messagingSenderId: "905774533816",
+  appId: "1:905774533816:web:bfaf49a1b3bf744f88384d"
 };
 
-export const getAuth = () => {
-  const auth = getGlobal('fbAuth');
-  if (!auth) console.warn("Firebase Auth is not initialized yet.");
-  return auth;
-};
+const app = initializeApp(firebaseConfig);
+const auth = getFirebaseAuth(app);
+const db = getFirestore(app);
 
-export const getDb = () => {
-  const db = getGlobal('fbDb');
-  if (!db) console.warn("Firebase Firestore (fbDb) is not initialized yet.");
-  return db;
-};
+// Enable offline persistence
+try {
+  enableIndexedDbPersistence(db).catch(() => {});
+} catch (e) {}
 
-// Standard Method Bridge
-const getMethod = (serviceName: string, methodName: string) => {
-  return (...args: any[]) => {
-    const methods = getGlobal(serviceName);
-    if (!methods || !methods[methodName]) {
-      console.error(`Firebase method ${serviceName}.${methodName} is not available.`);
-      return null;
-    }
-    return methods[methodName](...args);
-  };
-};
+export const getAuth = () => auth;
+export const getDb = () => db;
 
 // Auth Methods
-export const signInWithEmailAndPassword = (...args: any[]) => getMethod('fbAuthMethods', 'signInWithEmailAndPassword')(...args);
-export const signOut = (...args: any[]) => getMethod('fbAuthMethods', 'signOut')(...args);
-export const onAuthStateChanged = (...args: any[]) => getMethod('fbAuthMethods', 'onAuthStateChanged')(...args);
+export const signInWithEmailAndPassword = firebaseSignIn;
+export const signOut = firebaseSignOut;
+export const onAuthStateChanged = firebaseOnAuth;
 
-// Firestore Methods (Sync & Async handled by calling directly)
-export const collection = (...args: any[]) => getMethod('fbFirestoreMethods', 'collection')(...args);
-export const doc = (...args: any[]) => getMethod('fbFirestoreMethods', 'doc')(...args);
-export const query = (...args: any[]) => getMethod('fbFirestoreMethods', 'query')(...args);
-export const where = (...args: any[]) => getMethod('fbFirestoreMethods', 'where')(...args);
-export const orderBy = (...args: any[]) => getMethod('fbFirestoreMethods', 'orderBy')(...args);
-export const limit = (...args: any[]) => getMethod('fbFirestoreMethods', 'limit')(...args);
-export const increment = (...args: any[]) => getMethod('fbFirestoreMethods', 'increment')(...args);
-
-// Async Firestore Operations
-export const getDoc = (...args: any[]) => getMethod('fbFirestoreMethods', 'getDoc')(...args);
-export const getDocs = (...args: any[]) => getMethod('fbFirestoreMethods', 'getDocs')(...args);
-export const setDoc = (...args: any[]) => getMethod('fbFirestoreMethods', 'setDoc')(...args);
-export const addDoc = (...args: any[]) => getMethod('fbFirestoreMethods', 'addDoc')(...args);
-export const updateDoc = (...args: any[]) => getMethod('fbFirestoreMethods', 'updateDoc')(...args);
-export const deleteDoc = (...args: any[]) => getMethod('fbFirestoreMethods', 'deleteDoc')(...args);
-
-export const Timestamp = {
-  now: () => getGlobal('fbFirestoreMethods')?.Timestamp?.now() || new Date(),
-  fromDate: (date: Date) => getGlobal('fbFirestoreMethods')?.Timestamp?.fromDate(date) || date,
-};
+// Firestore Methods
+export const collection = firestoreCollection;
+export const doc = firestoreDoc;
+export const query = firestoreQuery;
+export const where = firestoreWhere;
+export const orderBy = firestoreOrderBy;
+export const limit = firestoreLimit;
+export const increment = firestoreIncrement;
+export const getDoc = firestoreGetDoc;
+export const getDocs = firestoreGetDocs;
+export const setDoc = firestoreSetDoc;
+export const addDoc = firestoreAddDoc;
+export const updateDoc = firestoreUpdateDoc;
+export const deleteDoc = firestoreDeleteDoc;
+export const Timestamp = firestoreTimestamp;
