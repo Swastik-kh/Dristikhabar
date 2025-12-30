@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserRole, User } from '../../types';
-import { getDb, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, query, orderBy } from '../../services/firebase';
+import { getDb, collection, getDocs, addDoc, updateDoc, doc, deleteDoc, query, orderBy, where } from '../../services/firebase';
 
 interface ExtendedUser extends User {
   username: string;
@@ -21,18 +21,22 @@ const UserManagement: React.FC = () => {
     email: '',
     password: ''
   });
+  const [error, setError] = useState<string | null>(null); // New state for error
+  const [modalError, setModalError] = useState<string | null>(null); // New state for modal-specific error
 
   const fetchUsers = async () => {
     setLoading(true);
+    setError(null); // Clear previous errors
     try {
       const db = getDb();
-      if (!db) return;
+      if (!db) throw new Error("Database not connected.");
       const q = query(collection(db, 'users'), orderBy('name'));
       const snap = await getDocs(q);
       const userList = snap.docs.map(d => ({ id: d.id, ...d.data() } as ExtendedUser));
       setUsers(userList);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error fetching users:", e);
+      setError(`प्रयोगकर्ताहरू लोड गर्दा त्रुटि भयो: ${e.message}`);
     } finally {
       setLoading(false);
     }
@@ -46,11 +50,21 @@ const UserManagement: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser.name || !currentUser.username) return alert("नाम र युजरनेम अनिवार्य छ!");
-    if (!currentUser.id && !currentUser.password) return alert("नयाँ प्रयोगकर्ताको लागि पासवर्ड अनिवार्य छ!");
+    setModalError(null); // Clear previous modal errors
+
+    if (!currentUser.name || !currentUser.username) {
+      setModalError("नाम र युजरनेम अनिवार्य छ!");
+      return;
+    }
+    if (!currentUser.id && !currentUser.password) {
+      setModalError("नयाँ प्रयोगकर्ताको लागि पासवर्ड अनिवार्य छ!");
+      return;
+    }
 
     try {
       const db = getDb();
+      if (!db) throw new Error("Database not connected.");
+
       const userData: any = {
         name: currentUser.name,
         username: currentUser.username.toLowerCase().trim(),
@@ -68,9 +82,10 @@ const UserManagement: React.FC = () => {
         alert("प्रयोगकर्ता विवरण अपडेट भयो।");
       } else {
         // Check if username already exists
-        const exists = users.some(u => u.username === userData.username);
-        if (exists) {
-          alert("यो युजरनेम पहिल्यै प्रयोगमा छ। कृपया अर्को रोज्नुहोस्।");
+        const qUsernameExists = query(collection(db, 'users'), where("username", "==", userData.username));
+        const usernameSnapshot = await getDocs(qUsernameExists);
+        if (!usernameSnapshot.empty) {
+          setModalError("यो युजरनेम पहिल्यै प्रयोगमा छ। कृपया अर्को रोज्नुहोस्।");
           return;
         }
 
@@ -84,20 +99,23 @@ const UserManagement: React.FC = () => {
       setShowModal(false);
       fetchUsers();
       setCurrentUser({ name: '', username: '', role: 'reporter', email: '', password: '' });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("विवरण सुरक्षित गर्दा त्रुटि भयो।");
+      setModalError(e.message || "विवरण सुरक्षित गर्दा त्रुटि भयो।");
     }
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm("के तपाईं यो प्रयोगकर्तालाई हटाउन चाहनुहुन्छ? यो प्रक्रिया फिर्ता गर्न सकिँदैन।")) {
       try {
-        await deleteDoc(doc(getDb(), 'users', id));
+        const db = getDb();
+        if (!db) throw new Error("Database not connected.");
+        await deleteDoc(doc(db, 'users', id));
         fetchUsers();
         alert("प्रयोगकर्ता सफलतापूर्वक हटाइयो।");
-      } catch (e) {
-        alert("हटाउन त्रुटि भयो।");
+      } catch (e: any) {
+        console.error(e);
+        alert(e.message || "हटाउन त्रुटि भयो।");
       }
     }
   };
@@ -124,6 +142,7 @@ const UserManagement: React.FC = () => {
           <button 
             onClick={() => {
               setCurrentUser({ name: '', username: '', role: 'reporter', email: '', password: '' });
+              setModalError(null); // Clear modal errors on open
               setShowModal(true);
             }}
             className="bg-red-700 text-white px-6 py-3 rounded-2xl font-black hover:bg-red-800 transition-all shadow-xl shadow-red-200 flex items-center gap-2"
@@ -133,6 +152,13 @@ const UserManagement: React.FC = () => {
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake" role="alert">
+          <strong className="font-bold">त्रुटि:</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
+      )}
 
       <div className="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
         {loading ? (
@@ -170,7 +196,7 @@ const UserManagement: React.FC = () => {
                       {isPradhanSampadak && (
                         <div className="flex justify-end gap-2">
                           <button 
-                            onClick={() => { setCurrentUser({ ...user, password: '' }); setShowModal(true); }}
+                            onClick={() => { setCurrentUser({ ...user, password: '' }); setModalError(null); setShowModal(true); }}
                             className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
                             title="सम्पादन गर्नुहोस्"
                           >
@@ -214,6 +240,13 @@ const UserManagement: React.FC = () => {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-8 space-y-5">
+              {modalError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake" role="alert">
+                  <strong className="font-bold">त्रुटि:</strong>
+                  <span className="block sm:inline ml-2">{modalError}</span>
+                </div>
+              )}
+
               <div className="space-y-1">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-500 ml-1">पूरा नाम</label>
                 <input 

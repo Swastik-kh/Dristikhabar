@@ -5,9 +5,12 @@ import { settingsService } from '../services/settingsService';
 const AdvertisementRatesPage: React.FC = () => {
   const [adRatesContent, setAdRatesContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // New state for error
 
   useEffect(() => {
     const fetchRates = async () => {
+      setLoading(true);
+      setError(null); // Clear previous errors
       try {
         const settings = await settingsService.getSettings();
         if (settings && settings.adRates) {
@@ -17,8 +20,9 @@ const AdvertisementRatesPage: React.FC = () => {
           const savedAdRates = localStorage.getItem('drishti_ad_rates');
           if (savedAdRates) setAdRatesContent(savedAdRates);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch ad rates:", err);
+        setError(`विज्ञापन दरहरू लोड गर्दा त्रुटि भयो: ${err.message || "अज्ञात त्रुटि"}`);
       } finally {
         setLoading(false);
       }
@@ -43,6 +47,13 @@ const AdvertisementRatesPage: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-20">
              <div className="w-10 h-10 border-4 border-red-700 border-t-transparent rounded-full animate-spin mb-4"></div>
              <p className="text-slate-400 font-black uppercase tracking-widest text-xs">विवरण खुल्दैछ...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake mx-auto max-w-lg" role="alert">
+              <strong className="font-bold">त्रुटि:</strong>
+              <span className="block sm:inline ml-2">{error}</span>
+            </div>
           </div>
         ) : adRatesContent ? (
           <div 

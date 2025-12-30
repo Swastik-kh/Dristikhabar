@@ -14,10 +14,12 @@ const HomePage: React.FC = () => {
   const [topAd, setTopAd] = useState<any>(null);
   const [bottomAd, setBottomAd] = useState<any>(null);
   const [adsenseCode, setAdsenseCode] = useState<string>('');
+  const [error, setError] = useState<string | null>(null); // New state for error
 
   useEffect(() => {
     const fetchNewsAndSettings = async () => {
       setLoading(true);
+      setError(null); // Clear previous errors
       try {
         const [newsData, settings] = await Promise.all([
           newsService.getPublishedNews(),
@@ -38,8 +40,9 @@ const HomePage: React.FC = () => {
           if (savedBottom) setBottomAd(JSON.parse(savedBottom));
           if (savedAdsense) setAdsenseCode(savedAdsense);
         }
-      } catch (err) {
-        console.error("Failed to fetch news or settings:", err);
+      } catch (err: any) {
+        console.error("Failed to fetch news or settings for HomePage:", err);
+        setError(`समाचार वा सेटिङ्गहरू लोड गर्दा त्रुटि भयो: ${err.message || "अज्ञात त्रुटि"}`);
       } finally {
         setLoading(false);
       }
@@ -57,7 +60,7 @@ const HomePage: React.FC = () => {
         (window as any).adsbygoogle = (window as any).adsbygoogle || [];
         (window as any).adsbygoogle.push({});
       } catch (e) {
-        console.warn("Failed to push to adsbygoogle:", e);
+        console.warn("Failed to push to adsbygoogle from HomePage:", e);
       }
     }
   }, [adsenseCode, topAd, bottomAd]); // Rerun if adsenseCode or ad settings change
@@ -134,6 +137,17 @@ const HomePage: React.FC = () => {
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="w-12 h-12 border-4 border-red-700 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p className="font-black text-slate-400 uppercase tracking-widest text-xs">लोड हुँदैछ...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake mx-auto max-w-lg" role="alert">
+          <strong className="font-bold">त्रुटि:</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
       </div>
     );
   }

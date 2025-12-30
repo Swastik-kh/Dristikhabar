@@ -23,6 +23,7 @@ const NewsEditor: React.FC = () => {
     showAuthorName: true,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null); // New state for error
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -33,8 +34,14 @@ const NewsEditor: React.FC = () => {
 
     if (id) {
       const fetchItem = async () => {
-        const item = await newsService.getNewsById(id);
-        if (item) setNews(item);
+        setError(null); // Clear previous errors
+        try {
+          const item = await newsService.getNewsById(id);
+          if (item) setNews(item);
+        } catch (e: any) {
+          console.error("Error fetching news for edit:", e);
+          setError(e.message || "समाचार लोड गर्दा त्रुटि भयो।");
+        }
       };
       fetchItem();
     }
@@ -80,6 +87,7 @@ const NewsEditor: React.FC = () => {
   const handleSave = async (finalStatus: NewsStatus) => {
     if (!news.title || !news.content) return alert("शीर्षक र समाचार अनिवार्य छ!");
     setIsSaving(true);
+    setError(null); // Clear previous errors
     
     const isReporter = user?.role === 'reporter';
     let actualStatus = finalStatus;
@@ -101,7 +109,8 @@ const NewsEditor: React.FC = () => {
       alert(isReporter && finalStatus === 'published' ? "अनुमोदनका लागि पठाइयो।" : "सफलतापूर्वक सुरक्षित गरियो!");
       navigate('/admin/news');
     } catch (e: any) {
-      alert("सुरक्षित गर्दा त्रुटि भयो: " + (e.message || "Unknown error"));
+      console.error("Save failed:", e);
+      setError("सुरक्षित गर्दा त्रुटि भयो: " + (e.message || "Unknown error"));
     } finally {
       setIsSaving(false);
     }
@@ -113,6 +122,13 @@ const NewsEditor: React.FC = () => {
         <h2 className="text-2xl font-black text-slate-800">{id ? 'समाचार सम्पादन' : 'नयाँ समाचार'}</h2>
         <button onClick={() => navigate('/admin/news')} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-xl">रद्द</button>
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative mb-6 animate-shake" role="alert">
+          <strong className="font-bold">त्रुटि:</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
+      )}
 
       <div className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

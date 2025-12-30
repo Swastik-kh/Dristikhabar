@@ -5,6 +5,8 @@ import { getCurrentNepaliDate } from '../utils/nepaliDate';
 
 const PrivacyPolicyPage: React.FC = () => {
   const bsDate = getCurrentNepaliDate();
+  // No direct data fetching in this component, so no specific error handling for fetch operations.
+  // Content is static.
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl min-h-[60vh] font-mukta">

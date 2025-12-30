@@ -1,26 +1,26 @@
 
 import React, { useState, useEffect } from 'react';
-import { toNepaliNumeral } from '../../constants';
+import { NEPALI_DAYS, toNepaliNumeral } from '../../constants';
 import { NewsItem } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { getRelativeTime } from '../../utils/nepaliDate';
 import { newsService } from '../../services/newsService';
+import { viewService } from '../../services/viewService'; // New import
 
-const DATA = [
-  { name: 'आइतबार', views: 4000 },
-  { name: 'सोमबार', views: 3000 },
-  { name: 'मंगलबार', views: 2000 },
-  { name: 'बुधबार', views: 2780 },
-  { name: 'बिहिबार', views: 1890 },
-  { name: 'शुक्रबार', views: 2390 },
-  { name: 'शनिबार', views: 3490 },
-];
+// Removed static DATA, will be dynamic from viewService
 
 const Dashboard: React.FC = () => {
   const [recentNews, setRecentNews] = useState<NewsItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // New state for error handling
+
+  // New states for dynamic view data
+  const [totalSiteViews, setTotalSiteViews] = useState<number>(0);
+  const [todayViews, setTodayViews] = useState<number>(0);
+  const [weeklyTrafficData, setWeeklyTrafficData] = useState<{ name: string; views: number }[]>([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,11 +29,38 @@ const Dashboard: React.FC = () => {
 
     const fetchData = async () => {
       setLoading(true);
+      setError(null); // Clear previous errors
       try {
-        const news = await newsService.getRecentNews(10);
+        const [
+          news,
+          siteTotalViews,
+          todayViewsCount,
+          weeklyViews
+        ] = await Promise.all([
+          newsService.getRecentNews(10), // For recent news table
+          viewService.getAllTimeTotalViews(),
+          viewService.getTodayViews(),
+          viewService.getWeeklyViews()
+        ]);
+        
         setRecentNews(news);
-      } catch (err) {
-        console.error("Dashboard news fetch failed", err);
+        setTotalSiteViews(siteTotalViews);
+        setTodayViews(todayViewsCount);
+
+        // Map weekly views data for Recharts, converting day IDs to Nepali day names
+        const chartData = weeklyViews.map(dayData => {
+          const adDate = new Date(dayData.id); // Parse YYYY-MM-DD
+          const dayIndex = adDate.getDay(); // 0 for Sunday, 1 for Monday, etc.
+          return {
+            name: NEPALI_DAYS[dayIndex],
+            views: dayData.totalViews
+          };
+        });
+        setWeeklyTrafficData(chartData);
+
+      } catch (err: any) {
+        console.error("Dashboard data fetch failed:", err);
+        setError(`ड्यासबोर्ड डेटा लोड गर्दा त्रुटि भयो: ${err.message || "अज्ञात त्रुटि"}`);
       } finally {
         setLoading(false);
       }
@@ -48,9 +75,9 @@ const Dashboard: React.FC = () => {
         await newsService.deleteNews(id);
         setRecentNews(prev => prev.filter(n => n.id !== id));
         alert("समाचार सफलतापूर्वक हटाइयो।");
-      } catch (err) {
+      } catch (err: any) { // Catch the error message from service
         console.error(err);
-        alert("त्रुटि भयो।");
+        alert(err.message || "त्रुटि भयो।");
       }
     }
   };
@@ -74,21 +101,28 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake" role="alert">
+          <strong className="font-bold">त्रुटि:</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'कुल समाचार', value: recentNews.length, color: 'text-blue-600', bg: 'bg-blue-50', icon: '📰' },
-          { label: 'कुल भ्युज', value: '१२.५K', color: 'text-green-600', bg: 'bg-green-50', icon: '👁️' },
-          { label: 'प्रतिक्षामा', value: recentNews.filter(n => n.status === 'pending').length, color: 'text-orange-600', bg: 'bg-orange-50', icon: '⏳' },
-          { label: 'आजको भ्युज', value: 1240, color: 'text-red-600', bg: 'bg-red-50', icon: '📈' },
+          { label: 'कुल समाचार', value: toNepaliNumeral(recentNews.length), color: 'text-blue-600', bg: 'bg-blue-50', icon: '📰' },
+          { label: 'कुल भ्युज', value: toNepaliNumeral(totalSiteViews), color: 'text-green-600', bg: 'bg-green-50', icon: '👁️' },
+          { label: 'प्रतिक्षामा', value: toNepaliNumeral(recentNews.filter(n => n.status === 'pending').length), color: 'text-orange-600', bg: 'bg-orange-50', icon: '⏳' },
+          { label: 'आजको भ्युज', value: toNepaliNumeral(todayViews), color: 'text-red-600', bg: 'bg-red-50', icon: '📈' },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 group hover:border-red-500 transition-all duration-500">
             <div className="flex items-center justify-between mb-4">
               <span className={`w-12 h-12 ${stat.bg} flex items-center justify-center rounded-2xl text-2xl`}>{stat.icon}</span>
-              <span className={`${stat.color} bg-white text-[10px] font-black px-2 py-1 rounded-full border border-slate-100 shadow-sm`}>+१२%</span>
+              <span className={`${stat.color} bg-white text-[10px] font-black px-2 py-1 rounded-full border border-slate-100 shadow-sm`}>+१२%</span> {/* This remains static */}
             </div>
             <h3 className="text-slate-400 font-black uppercase tracking-widest text-[10px]">{stat.label}</h3>
             <p className="text-3xl font-black mt-1 text-slate-800">
-              {typeof stat.value === 'number' ? toNepaliNumeral(stat.value) : stat.value}
+              {stat.value}
             </p>
           </div>
         ))}
@@ -102,7 +136,7 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={DATA}>
+              <BarChart data={weeklyTrafficData}> {/* Dynamic data */}
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700, fill: '#94a3b8'}} />
                 <YAxis hide />
@@ -115,15 +149,15 @@ const Dashboard: React.FC = () => {
 
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-8">
-             <h3 className="text-xl font-black text-slate-800 uppercase tracking-wider text-sm">लाइभ ट्राफिक</h3>
+             <h3 className="text-xl font-black text-slate-800 uppercase tracking-wider text-sm">दैनिक भ्युज प्रवृत्ति</h3>
              <span className="flex items-center gap-1.5 text-[10px] font-black text-green-600 bg-green-50 px-3 py-1 rounded-full">
                 <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-ping"></span>
-                ACTIVE NOW
+                गत ७ दिन
              </span>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={DATA}>
+              <LineChart data={weeklyTrafficData}> {/* Dynamic data */}
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 700, fill: '#94a3b8'}} />
                 <YAxis hide />

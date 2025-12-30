@@ -20,6 +20,21 @@ const monthDaysLookup: Record<number, number[]> = {
 const anchorBS = { year: 2081, month: 1, day: 1 };
 const anchorAD = new Date(2024, 3, 13); // April is 3
 
+/**
+ * Returns today's date in YYYY-MM-DD format based on Nepal Standard Time (UTC+5:45).
+ */
+export function getNepalLocalDateString(): string {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000); // Convert to UTC in milliseconds
+  const nepalTime = new Date(utc + (345 * 60000)); // Add 5 hours 45 minutes for NPT
+
+  const year = nepalTime.getFullYear();
+  const month = (nepalTime.getMonth() + 1).toString().padStart(2, '0');
+  const day = nepalTime.getDate().toString().padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 export function getCurrentNepaliDate() {
   const now = new Date();
   

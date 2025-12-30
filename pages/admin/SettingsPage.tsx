@@ -37,6 +37,7 @@ const SettingsPage: React.FC = () => {
 
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // New state for error
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const topAdFileRef = useRef<HTMLInputElement>(null);
@@ -44,6 +45,7 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     const loadSettings = async () => {
+      setError(null); // Clear previous errors
       try {
         const dbSettings = await settingsService.getSettings();
         if (dbSettings) {
@@ -56,8 +58,9 @@ const SettingsPage: React.FC = () => {
           if (dbSettings.playStoreUrl) setPlayStoreUrl(dbSettings.playStoreUrl);
           if (dbSettings.socialLinks) setSocialLinks(dbSettings.socialLinks);
         }
-      } catch (err) {
-        console.error("Initial settings load failed", err);
+      } catch (err: any) {
+        console.error("Initial settings load failed:", err);
+        setError(`सेटिङ्गहरू लोड गर्दा त्रुटि भयो: ${err.message}`);
       }
     };
     loadSettings();
@@ -103,6 +106,7 @@ const SettingsPage: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true);
     setMessage(null);
+    setError(null); // Clear previous errors
     
     const settingsData = {
       siteLogo: logo,
@@ -129,7 +133,8 @@ const SettingsPage: React.FC = () => {
         setTimeout(() => setMessage(null), 3000);
       }
     } catch (e: any) {
-      alert("सुरक्षित गर्न सकिएन: " + e.message);
+      console.error("Save failed:", e);
+      setError("सुरक्षित गर्न सकिएन: " + e.message);
     } finally {
       setIsSaving(false);
     }
@@ -196,6 +201,12 @@ const SettingsPage: React.FC = () => {
       </div>
 
       {message && <div className="bg-green-600 text-white p-4 rounded-2xl font-black text-center animate-bounce">{message}</div>}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake" role="alert">
+          <strong className="font-bold">त्रुटि:</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
+      )}
 
       {/* Google AdSense Section */}
       <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
@@ -237,6 +248,44 @@ const SettingsPage: React.FC = () => {
       <div className="grid grid-cols-1 gap-8">
         {renderAdSection('माथिल्लो विज्ञापन (Top Banner)', topAd, setTopAd, topAdFileRef, 'top')}
         {renderAdSection('तल्लो विज्ञापन (Bottom Banner)', bottomAd, setBottomAd, bottomAdFileRef, 'bottom')}
+      </div>
+      
+      {/* App Store / Play Store URLs */}
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b bg-slate-50">
+          <h3 className="font-black text-slate-800 uppercase tracking-wider text-sm">मोबाइल एप लिङ्कहरू</h3>
+        </div>
+        <div className="p-8 space-y-5">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Play Store URL</label>
+            <input type="text" value={appStoreUrl} onChange={(e) => setAppStoreUrl(e.target.value)} className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">App Store URL</label>
+            <input type="text" value={playStoreUrl} onChange={(e) => setPlayStoreUrl(e.target.value)} className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold" />
+          </div>
+        </div>
+      </div>
+
+      {/* Social Links */}
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b bg-slate-50">
+          <h3 className="font-black text-slate-800 uppercase tracking-wider text-sm">सामाजिक सञ्जाल लिङ्कहरू</h3>
+        </div>
+        <div className="p-8 space-y-5">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Facebook URL</label>
+            <input type="text" value={socialLinks.facebook} onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})} className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Twitter (X) URL</label>
+            <input type="text" value={socialLinks.twitter} onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})} className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">YouTube URL</label>
+            <input type="text" value={socialLinks.youtube} onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})} className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold" />
+          </div>
+        </div>
       </div>
     </div>
   );

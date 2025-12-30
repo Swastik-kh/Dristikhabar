@@ -12,16 +12,19 @@ const NewsList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null); // New state for error
   const navigate = useNavigate();
 
   const fetchNews = async () => {
     setLoading(true);
+    setError(null); // Clear previous errors
     try {
       // Fetching all news items for admin panel
-      const data = await newsService.getRecentNews(500);
+      const data = await newsService.getRecentNews(500); // Increased limit for admin list
       setNewsList(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch news:", err);
+      setError(`समाचारहरू लोड गर्दा त्रुटि भयो: ${err.message || "अज्ञात त्रुटि"}`);
     } finally {
       setLoading(false);
     }
@@ -42,8 +45,9 @@ const NewsList: React.FC = () => {
         });
         alert("समाचार सफलतापूर्वक प्रकाशित भयो!");
         fetchNews();
-      } catch (err) {
-        alert("त्रुटि भयो।");
+      } catch (err: any) {
+        console.error(err);
+        alert(err.message || "समाचार प्रकाशित गर्दा त्रुटि भयो।");
       }
     }
   };
@@ -54,8 +58,9 @@ const NewsList: React.FC = () => {
         await newsService.deleteNews(id);
         alert("समाचार सफलतापूर्वक हटाइयो।");
         fetchNews();
-      } catch (err) {
-        alert("समाचार हटाउन प्राविधिक समस्या भयो।");
+      } catch (err: any) {
+        console.error(err);
+        alert(err.message || "समाचार हटाउन प्राविधिक समस्या भयो।");
       }
     }
   };
@@ -98,6 +103,13 @@ const NewsList: React.FC = () => {
           नयाँ समाचार थप्नुहोस्
         </Link>
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative animate-shake" role="alert">
+          <strong className="font-bold">त्रुटि:</strong>
+          <span className="block sm:inline ml-2">{error}</span>
+        </div>
+      )}
 
       <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
@@ -199,8 +211,7 @@ const NewsList: React.FC = () => {
                               title="सम्पादन गर्नुहोस्"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </button>
                           )}
 
@@ -211,8 +222,7 @@ const NewsList: React.FC = () => {
                               title="हटाउनुहोस्"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                           )}
                         </div>

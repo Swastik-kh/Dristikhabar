@@ -3,6 +3,9 @@ import React from 'react';
 import { APP_NAME } from '../constants';
 
 const ContactUsPage: React.FC = () => {
+  // No direct data fetching in this component, so no specific error handling for fetch operations
+  // If contact details were dynamic, similar error state and display would be added.
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl min-h-[60vh] font-mukta">
       <div className="mb-12">

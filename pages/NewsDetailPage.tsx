@@ -12,11 +12,17 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
   const [news, setNews] = useState<Partial<NewsItem> | null>(null);
   const [loading, setLoading] = useState(!previewData);
   const [adsenseCode, setAdsenseCode] = useState<string>('');
+  const [error, setError] = useState<string | null>(null); // New state for error
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const settings = await settingsService.getSettings();
-      if (settings?.adsenseCode) setAdsenseCode(settings.adsenseCode);
+      try {
+        const settings = await settingsService.getSettings();
+        if (settings?.adsenseCode) setAdsenseCode(settings.adsenseCode);
+      } catch (err: any) {
+        console.error("Failed to fetch settings for NewsDetailPage:", err);
+        // Optionally set a non-blocking error for settings if critical
+      }
     };
     fetchSettings();
 
@@ -32,8 +38,9 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
             setNews(item);
             document.title = `${item.title} - ${APP_NAME}`;
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error(err);
+          setError(err.message || "समाचार लोड गर्न सकेन।"); // Set error message
         } finally {
           setLoading(false);
         }
@@ -42,14 +49,15 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
     }
   }, [id, previewData]);
 
-  // Execute AdSense script if code is present
+  // Execute AdSense script if code is present and component mounts/updates
   useEffect(() => {
     if (adsenseCode) {
       try {
+        // Ensure that adsbygoogle.js is loaded from index.html
         (window as any).adsbygoogle = (window as any).adsbygoogle || [];
         (window as any).adsbygoogle.push({});
       } catch (e) {
-        // Handle error if adsbygoogle script is not loaded yet
+        console.warn("Failed to push to adsbygoogle from NewsDetailPage:", e);
       }
     }
   }, [news, adsenseCode]);
@@ -61,6 +69,13 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
     </div>
   );
   
+  if (error) return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center p-10 text-center text-red-700 bg-red-50 rounded-xl m-4 border border-red-200">
+      <p className="font-black text-lg mb-2">त्रुटि भयो!</p>
+      <p className="text-base font-medium">{error}</p>
+    </div>
+  );
+
   if (!news || Object.keys(news).length === 0) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center p-10 text-center text-slate-500">समाचार फेला परेन।</div>
   );
@@ -159,9 +174,9 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
               <h4 className="font-black text-xl text-slate-800">यो समाचार सेयर गर्नुहोस्</h4>
               <p className="text-slate-500 font-bold text-sm">सत्य र तथ्य समाचार सबै माझ पुर्‍याउनुहोस्।</p>
             </div>
-            <div className="flex gap-4">
-               <button onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')} className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12.073-12-12.073s-12 5.446-12 12.073c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></button>
-               <button onClick={() => { navigator.clipboard.writeText(window.location.href); alert("लिङ्क कपी गरियो!"); }} className="w-12 h-12 bg-slate-800 text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg></button>
+            <div className="flex flex-col sm:flex-row gap-4">
+               <button onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')} className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black hover:bg-blue-700 transition-all text-center">फेसबुक</button>
+               <button onClick={() => { navigator.clipboard.writeText(window.location.href); alert("लिङ्क कपी गरियो!"); }} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black hover:bg-slate-700 transition-all border border-slate-700 text-center">लिङ्क कपी</button>
             </div>
          </div>
       </div>
