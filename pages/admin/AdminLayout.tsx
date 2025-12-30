@@ -174,6 +174,10 @@ const AdminLayout: React.FC = () => {
       </aside>
       <main className="flex-1 p-8 overflow-y-auto md:ml-64">
         <Outlet />
+        {/* NEW: Admin panel specific footer */}
+        <div className="mt-10 pt-6 border-t border-slate-200 text-center text-slate-400 text-xs font-medium">
+          Developed by : Swastik Khatiwada
+        </div>
       </main>
     </div>
   );

@@ -56,10 +56,10 @@ const App: React.FC = () => {
           <Route path="/news/:id" element={<><Header logo={siteLogo} /><NewsDetailPage /></>} />
           <Route path="/category/:id" element={<><Header logo={siteLogo} /><HomePage /></>} />
           <Route path="/advertisement-rates" element={<><Header logo={siteLogo} /><AdvertisementRatesPage /></>} />
-          <Route path="/about-us" element={<><Header logo={siteLogo} /><AboutUsPage /></>} /> {/* New Route */}
-          <Route path="/contact-us" element={<><Header logo={siteLogo} /><ContactUsPage /></>} /> {/* New Route */}
-          <Route path="/privacy-policy" element={<><Header logo={siteLogo} /><PrivacyPolicyPage /></>} /> {/* New Route */}
-          <Route path="/disclaimer" element={<><Header logo={siteLogo} /><DisclaimerPage /></>} /> {/* New Route */}
+          <Route path="/about-us" element={<><Header logo={siteLogo} /><AboutUsPage /></>} /> {/* Updated Link */}
+          <Route path="/contact-us" element={<><Header logo={siteLogo} /><ContactUsPage /></>} /> {/* Updated Link */}
+          <Route path="/privacy-policy" element={<><Header logo={siteLogo} /><PrivacyPolicyPage /></>} /> {/* Updated Link */}
+          <Route path="/disclaimer" element={<><Header logo={siteLogo} /><DisclaimerPage /></>} /> {/* New Link */}
 
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminLayout />}>
@@ -144,6 +144,7 @@ const App: React.FC = () => {
             
             <div className="pt-8 border-t border-slate-900 text-center text-slate-600 text-[10px] font-black tracking-[0.2em] uppercase">
               &copy; २०८२ दृष्टि खबर मिडिया प्रा.लि. | सर्वाधिकार सुरक्षित
+              {/* <p className="mt-2 text-slate-500 text-[9px]">Developed by : Swastik Khatiwada</p> */} {/* This line is removed */}
             </div>
           </div>
         </footer>
