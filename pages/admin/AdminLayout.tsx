@@ -1,12 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-// Removed Firebase Auth imports as custom login is used
-// import { getAuth, signOut, onAuthStateChanged } from '../../services/firebase'; 
+import { Link, Outlet, useLocation } from 'react-router-dom'; // Removed useNavigate as it's not directly used in critical path
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Removed as window.location directly handles navigation for logout/auth guard
   const [user, setUser] = useState<any>(null);
   const [siteLogo, setSiteLogo] = useState<string>('logo.png');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar visibility
@@ -20,9 +18,8 @@ const AdminLayout: React.FC = () => {
       // and force a full page replace to the login route for robustness.
       // This acts as a strong authentication guard on initial load.
       setUser(null);
-      console.log("AdminLayout: No user found in localStorage. Forcing redirect to admin login.");
+      console.log("AdminLayout: No user found in localStorage on mount. Forcing redirect to admin login.");
       window.location.replace('/#/admin/login'); // Using replace for a cleaner history
-      // No need to call navigate() here as window.location.replace performs a full browser navigation.
     }
 
     const savedLogo = localStorage.getItem('drishti_site_logo');
@@ -30,11 +27,24 @@ const AdminLayout: React.FC = () => {
       setSiteLogo(savedLogo);
     }
 
-    // No unsubscribe needed as Firebase onAuthStateChanged listener is removed
-    // return () => unsubscribe();
+    // NEW: Global Event Listener to react to localStorage changes (e.g., from another tab or atomic logout)
+    const handleStorageChange = (e: StorageEvent) => {
+      // If 'drishti_user' is cleared (e.newValue is null), force a page reload.
+      // This is crucial for HashRouter and ensures the app re-evaluates its auth state.
+      if (e.key === 'drishti_user' && e.newValue === null) {
+        console.log("AdminLayout: localStorage 'drishti_user' cleared via storage event. Forcing page reload.");
+        window.location.reload();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []); // Empty dependency array means this runs once on mount.
 
-  // FIX: This handleLogout function is rewritten as per user's explicit instructions
+  // FIX: This handleLogout function is rewritten as per user's explicit instructions for 100% reliability
   const handleLogout = () => {
     // Optional: Confirm with the user before logging out
     if (!window.confirm("के तपाईं बाहिर निस्कन चाहनुहुन्छ?")) {
@@ -44,31 +54,32 @@ const AdminLayout: React.FC = () => {
     // 1. Wipe ALL session data from local storage and session storage
     localStorage.clear();
     sessionStorage.clear(); // Clear session storage as well for thoroughness
-    console.log("All local and session storage cleared for a complete logout.");
+    console.log("AdminLayout: All local and session storage cleared for a complete logout.");
 
     // 2. Immediately update the component's internal state to reflect logout
     // This will cause AdminLayout to stop rendering its protected content.
     setUser(null); 
-    console.log("React user state set to null for immediate UI update.");
+    console.log("AdminLayout: React user state set to null for immediate UI update.");
 
-    // 3. Force the browser to navigate to the login page using the hash route
-    // Add a cache-busting timestamp to prevent browsers from loading cached content.
-    const loginUrlWithCacheBust = window.location.origin + '/#/admin/login?t=' + Date.now();
-    window.location.assign(loginUrlWithCacheBust); 
-    console.log("Initiated forceful navigation with cache busting:", loginUrlWithCacheBust);
+    // 3. Force the browser to navigate to the root path using replace.
+    // This clears the browser history back to the root, and the App.tsx router
+    // (combined with AdminLayout's useEffect auth guard) will then redirect to login.
+    // This is more robust for HashRouter and ensures no cached admin page is shown.
+    window.location.replace('/'); 
+    console.log("AdminLayout: Initiated forceful navigation to root path. Expecting App.tsx to redirect to login.");
 
-    // 4. Perform a full, fresh page reload. This is crucial for reliability.
-    window.location.reload(); 
-    console.log("Forced full page reload to ensure fresh start and prevent cached content.");
-
-    // Prevent any further JavaScript execution after initiating a page reload.
+    // IMPORTANT: No explicit window.location.reload() here. 
+    // The 'storage' event listener or the re-evaluation of App.tsx's router 
+    // on the new root path will handle the necessary reload/redirect.
+    
+    // Prevent any further JavaScript execution after initiating a page replacement.
     return;
   };
 
-  // SAFETY CHECK: If user is null, prevent ANY admin UI from rendering.
-  // This will catch cases where the user state becomes null (e.g., after handleLogout or useEffect's check).
-  if (!user) {
-    console.log("AdminLayout: User is null, returning null to prevent rendering protected content.");
+  // SAFETY CHECK: If user is null OR localStorage.getItem('drishti_user') is null/empty, 
+  // prevent ANY admin UI from rendering. This is the ultimate component shield.
+  if (!user || !localStorage.getItem('drishti_user')) {
+    console.log("AdminLayout: Safety check triggered - user state or localStorage user is null. Preventing protected content rendering.");
     return null; 
   }
 
