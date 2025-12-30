@@ -139,3 +139,36 @@ export function getRelativeTime(isoDateString: string | null | undefined): strin
   }
   return 'भविष्यको मिति (अमान्य)'; // Should not happen for published news
 }
+
+/**
+ * Transliterates Nepali Unicode text to Roman (English/Latin) characters.
+ * This is a simplified transliteration for slug generation, not a perfect phonetic conversion.
+ * @param nepaliText The Nepali text to transliterate.
+ * @returns The transliterated Roman text.
+ */
+export function transliterateNepali(nepaliText: string): string {
+  const mapping: { [key: string]: string } = {
+    'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au',
+    'क': 'ka', 'ख': 'kha', 'ग': 'ga', 'घ': 'gha', 'ङ': 'nga',
+    'च': 'cha', 'छ': 'chha', 'ज': 'ja', 'झ': 'jha', 'ञ': 'nya',
+    'ट': 'ta', 'ठ': 'tha', 'ड': 'da', 'ढ': 'dha', 'ण': 'na',
+    'त': 'ta', 'थ': 'tha', 'द': 'da', 'ध': 'dha', 'न': 'na',
+    'प': 'pa', 'फ': 'pha', 'ब': 'ba', 'भ': 'bha', 'म': 'ma',
+    'य': 'ya', 'र': 'ra', 'ल': 'la', 'व': 'wa',
+    'श': 'sha', 'ष': 'sha', 'स': 'sa', 'ह': 'ha',
+    'क्ष': 'kshya', 'त्र': 'tra', 'ज्ञ': 'gya',
+    'ं': 'n', 'ँ': 'n', 'ः': 'h',
+    '्': '', // Halant
+    'ा': 'a', 'ि': 'i', 'ी': 'ee', 'ु': 'u', 'ू': 'oo', 'े': 'e', 'ै': 'ai', 'ो': 'o', 'ौ': 'au',
+    'ृ': 'ri', 'ॢ': 'li',
+    '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9', '०': '0',
+    // Common conjuncts and special characters (simplified)
+    'श्री': 'shree', 'र्राष्ट्र': 'rashtra',
+  };
+
+  let romanText = '';
+  for (const char of nepaliText) {
+    romanText += mapping[char] || char;
+  }
+  return romanText;
+}

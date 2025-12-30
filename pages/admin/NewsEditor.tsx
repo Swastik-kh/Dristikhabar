@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { CATEGORIES } from '../../constants';
 import { NewsItem, NewsStatus } from '../../types';
 import { newsService } from '../../services/newsService';
+import { transliterateNepali } from '../../utils/nepaliDate'; // Import the new transliterate function
 
 const NewsEditor: React.FC = () => {
   const navigate = useNavigate();
@@ -47,19 +48,29 @@ const NewsEditor: React.FC = () => {
     }
   }, [id]);
 
-  const generateSlug = (text: string) => {
-    return text
+  // Modified generateSlug to use transliteration
+  const generateSlug = (text: string): string => {
+    // 1. Transliterate Nepali to Roman
+    const transliterated = transliterateNepali(text);
+    // 2. Clean up for URL slug: replace non-alphanumeric with hyphens, lowercase
+    return transliterated
       .trim()
-      .replace(/[^\u0900-\u097F\w\s-]/g, '') // Keep Nepali and alphanumeric
-      .replace(/\s+/g, '-')
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove non-alphanumeric except spaces and hyphens
+      .replace(/\s+/g, '-')        // Replace spaces with single hyphen
+      .replace(/--+/g, '-')       // Replace multiple hyphens with single hyphen
+      .replace(/^-+|-+$/g, '');   // Trim hyphens from start/end
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    const update: any = { title: val };
-    // Only auto-update slug for new news or if slug is empty
-    if (!id && (!news.slug || news.slug === generateSlug(news.title || ''))) {
+    const update: Partial<NewsItem> = { title: val };
+    // Only auto-update slug for new news or if slug is empty or matches auto-generated slug of previous title
+    // This logic ensures manual slug edits are preserved.
+    const currentAutoSlug = generateSlug(news.title || '');
+    if (!id && (!news.slug || news.slug === currentAutoSlug)) {
+      update.slug = generateSlug(val);
+    } else if (news.slug === currentAutoSlug) { // If current slug still matches old auto-generated, update it
       update.slug = generateSlug(val);
     }
     setNews({ ...news, ...update });
@@ -96,7 +107,7 @@ const NewsEditor: React.FC = () => {
     try {
       const payload = {
         ...news,
-        slug: news.slug || generateSlug(news.title || ''),
+        slug: news.slug || generateSlug(news.title || ''), // Ensure slug is generated if empty
         status: actualStatus,
         authorId: user?.id || 'admin',
         authorName: user?.name || 'Admin',
