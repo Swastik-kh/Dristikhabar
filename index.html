@@ -42,6 +42,60 @@
 </head>
   <body class="bg-gray-50 text-gray-900">
     <div id="root"></div>
+    <script type="text/javascript">
+      // Client-side redirect for clean URLs to hash URLs (for HashRouter apps)
+      (function() {
+        const path = window.location.pathname;
+        const search = window.location.search;
+        const currentHash = window.location.hash;
+
+        // List of paths that should be handled by React Router with a hash
+        const hashRoutedPaths = [
+          '/news/', // For individual news slugs
+          '/category/', // For category pages
+          '/advertisement-rates',
+          '/about-us',
+          '/contact-us',
+          '/privacy-policy',
+          '/disclaimer',
+          '/admin' // For admin panel routes
+        ];
+
+        let shouldRedirect = false;
+        let targetHashPath = '';
+
+        // Check if the current pathname matches any of our hash-routed paths
+        for (const routePrefix of hashRoutedPaths) {
+          if (path.startsWith(routePrefix)) {
+            shouldRedirect = true;
+            targetHashPath = '#' + path;
+            break;
+          }
+          // Special case for root path if we want to ensure it's /#/ or just #/
+          if (path === '/' && routePrefix === '/category/') { // Home page case
+            if (currentHash === '' || currentHash === '#/') {
+              // No need to redirect if already on root or hash root
+            } else {
+              shouldRedirect = true;
+              targetHashPath = '#/';
+            }
+          }
+        }
+        
+        // Also handle the root path redirection explicitly if it's a clean URL to hash root
+        if (path === '/' && currentHash === '') {
+          shouldRedirect = true;
+          targetHashPath = '#/';
+        }
+
+
+        // Perform redirect if necessary
+        if (shouldRedirect && currentHash !== targetHashPath) {
+          const newUrl = window.location.origin + targetHashPath + search;
+          window.location.replace(newUrl);
+        }
+      })();
+    </script>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
