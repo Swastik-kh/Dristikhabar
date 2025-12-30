@@ -51,7 +51,6 @@
         const currentHash = window.location.hash;
 
         // Paths that should be handled by React Router with a hash
-        // Any path starting with these prefixes (excluding '/') should be redirected.
         const hashRoutedPathPrefixes = [
           '/news/',
           '/category/',
@@ -63,29 +62,35 @@
           '/admin'
         ];
 
-        let shouldRedirect = false;
         let targetHashPath = '';
 
-        // Check for specific clean paths that should become hash paths
         if (path === '/') {
-          if (currentHash === '') { // If on root with no hash, redirect to hash root
-            shouldRedirect = true;
-            targetHashPath = '#/';
-          }
-        } else {
-          for (const routePrefix of hashRoutedPathPrefixes) {
-            if (path.startsWith(routePrefix)) {
-              shouldRedirect = true;
-              targetHashPath = '#' + path; // E.g., /news/slug -> #/news/slug
-              break;
+            // If on root with no hash, ensure it eventually becomes #/
+            if (currentHash === '') {
+                targetHashPath = '#/';
             }
-          }
+        } else {
+            for (const routePrefix of hashRoutedPathPrefixes) {
+                if (path.startsWith(routePrefix)) {
+                    // Combine path and search into the hash
+                    targetHashPath = '#' + path + search; // E.g., /news/slug?param=x -> #/news/slug?param=x
+                    break;
+                }
+            }
         }
 
-        // Perform redirect if a clean URL is detected and it's not already a hash URL
-        if (shouldRedirect && currentHash !== targetHashPath) {
-          const newUrl = window.location.origin + targetHashPath + search;
-          window.location.replace(newUrl); // Use replace to avoid polluting history
+        // Only redirect if a hash path is determined AND the current hash doesn't already match it
+        // This prevents unnecessary redirects and potential loops.
+        // Also, ensure we don't accidentally add a hash if `targetHashPath` is empty (no matching prefix).
+        if (targetHashPath && currentHash !== targetHashPath) {
+          // IMPORTANT: Directly set window.location.hash for HashRouter.
+          // This avoids a full page reload caused by window.location.replace,
+          // which can be disruptive, especially on initial load or social media embeds.
+          // The substring(1) removes the leading '#' before setting.
+          window.location.hash = targetHashPath.substring(1);
+
+          // No need for window.location.replace. Setting hash directly triggers
+          // a hashchange event which HashRouter listens to, updating the UI.
         }
       })();
     </script>
