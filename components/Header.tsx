@@ -88,8 +88,9 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
             सत्य, तथ्य र निष्पक्ष समाचारको संवाहक
           </span>
         </div>
-        <div className="flex justify-center md:justify-end items-center gap-4">
-          <Link to="/admin/login" className="text-slate-400 hover:text-white transition-colors font-black uppercase text-[9px] tracking-widest border border-slate-800 px-3 py-1 rounded-full">Login</Link>
+        {/* Repositioned Login for Mobile: Absolute on mobile, Relative on desktop */}
+        <div className="absolute top-2 right-2 md:relative md:top-auto md:right-auto flex justify-end items-center">
+          <Link to="/admin/login" className="text-slate-400 hover:text-white transition-colors font-black uppercase text-[9px] tracking-widest border border-slate-800 px-3 py-1 rounded-full bg-slate-900/50 backdrop-blur-sm md:bg-transparent">Login</Link>
         </div>
       </div>
 
