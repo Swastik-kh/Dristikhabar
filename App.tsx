@@ -12,6 +12,10 @@ import LoginPage from './pages/admin/LoginPage';
 import UserManagement from './pages/admin/UserManagement';
 import SettingsPage from './pages/admin/SettingsPage';
 import AdvertisementRatesPage from './pages/AdvertisementRatesPage';
+import AboutUsPage from './pages/AboutUsPage'; // New import
+import ContactUsPage from './pages/ContactUsPage'; // New import
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'; // New import
+import DisclaimerPage from './pages/DisclaimerPage'; // New import
 import { settingsService } from './services/settingsService';
 
 const App: React.FC = () => {
@@ -52,6 +56,11 @@ const App: React.FC = () => {
           <Route path="/news/:id" element={<><Header logo={siteLogo} /><NewsDetailPage /></>} />
           <Route path="/category/:id" element={<><Header logo={siteLogo} /><HomePage /></>} />
           <Route path="/advertisement-rates" element={<><Header logo={siteLogo} /><AdvertisementRatesPage /></>} />
+          <Route path="/about-us" element={<><Header logo={siteLogo} /><AboutUsPage /></>} /> {/* New Route */}
+          <Route path="/contact-us" element={<><Header logo={siteLogo} /><ContactUsPage /></>} /> {/* New Route */}
+          <Route path="/privacy-policy" element={<><Header logo={siteLogo} /><PrivacyPolicyPage /></>} /> {/* New Route */}
+          <Route path="/disclaimer" element={<><Header logo={siteLogo} /><DisclaimerPage /></>} /> {/* New Route */}
+
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
@@ -96,9 +105,11 @@ const App: React.FC = () => {
                 <ul className="space-y-3 text-slate-400 text-sm font-bold">
                   <li><Link to="/category/all" className="hover:text-white transition-colors">सबै समाचार</Link></li>
                   <li><Link to="/advertisement-rates" className="hover:text-white transition-colors">विज्ञापन दर</Link></li>
+                  <li><Link to="/about-us" className="hover:text-white transition-colors">हाम्रो बारेमा</Link></li> {/* Updated Link */}
+                  <li><Link to="/contact-us" className="hover:text-white transition-colors">हामीलाई सम्पर्क गर्नुहोस्</Link></li> {/* Updated Link */}
+                  <li><Link to="/privacy-policy" className="hover:text-white transition-colors">गोपनीयता नीति</Link></li> {/* Updated Link */}
+                  <li><Link to="/disclaimer" className="hover:text-white transition-colors">अस्वीकरण र सर्तहरू</Link></li> {/* New Link */}
                   <li><Link to="/admin" className="hover:text-red-500 transition-colors">प्रशासन लगइन</Link></li>
-                  <li><Link to="#" className="hover:text-white transition-colors">हाम्रो बारेमा</Link></li>
-                  <li><Link to="#" className="hover:text-white transition-colors">गोपनीयता नीति</Link></li>
                 </ul>
               </div>
               

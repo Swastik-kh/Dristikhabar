@@ -13,6 +13,7 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [topAd, setTopAd] = useState<any>(null);
   const [bottomAd, setBottomAd] = useState<any>(null);
+  const [adsenseCode, setAdsenseCode] = useState<string>('');
 
   useEffect(() => {
     const fetchNewsAndSettings = async () => {
@@ -28,11 +29,14 @@ const HomePage: React.FC = () => {
         if (settings) {
           if (settings.topAd) setTopAd(settings.topAd);
           if (settings.bottomAd) setBottomAd(settings.bottomAd);
+          if (settings.adsenseCode) setAdsenseCode(settings.adsenseCode);
         } else {
           const savedTop = localStorage.getItem('drishti_top_ad');
           const savedBottom = localStorage.getItem('drishti_bottom_ad');
+          const savedAdsense = localStorage.getItem('drishti_adsense_code');
           if (savedTop) setTopAd(JSON.parse(savedTop));
           if (savedBottom) setBottomAd(JSON.parse(savedBottom));
+          if (savedAdsense) setAdsenseCode(savedAdsense);
         }
       } catch (err) {
         console.error("Failed to fetch news or settings:", err);
@@ -43,6 +47,20 @@ const HomePage: React.FC = () => {
 
     fetchNewsAndSettings();
   }, []);
+
+  // Execute AdSense script if code is present and component mounts/updates
+  useEffect(() => {
+    if (adsenseCode) {
+      try {
+        // This ensures the ad slot is refreshed.
+        // The main adsbygoogle.js script must be loaded in index.html for this to work.
+        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+        (window as any).adsbygoogle.push({});
+      } catch (e) {
+        console.warn("Failed to push to adsbygoogle:", e);
+      }
+    }
+  }, [adsenseCode, topAd, bottomAd]); // Rerun if adsenseCode or ad settings change
 
   const breakingNews = publishedNews.filter(news => news.isBreaking).slice(0, 3);
   const isCategoryPage = id !== undefined;
@@ -68,28 +86,47 @@ const HomePage: React.FC = () => {
 
   const renderAdBanner = (adSettings: any, label: string) => {
     if (!adSettings) return null;
-    const isEmpty = !adSettings.mediaUrl && (!adSettings.titleText || adSettings.titleText.trim() === '');
-    if (isEmpty) return null;
+    
+    const isCustomAdConfigured = adSettings.mediaUrl || (adSettings.titleText && adSettings.titleText.trim() !== '');
 
-    return (
-      <div className="mb-10 group">
-        <Link to={adSettings.adLink || '/advertisement-rates'} className="block overflow-hidden rounded-2xl shadow-lg border border-slate-100 bg-slate-50 relative">
-          <div className="absolute top-2 right-2 bg-black/20 text-white text-[8px] px-1.5 py-0.5 rounded font-black z-10 backdrop-blur-sm tracking-widest">{label}</div>
-          {adSettings.mediaType === 'image' && adSettings.mediaUrl ? (
-            <img src={adSettings.mediaUrl} alt="Advertisement" className="w-full h-auto max-h-[120px] md:max-h-[250px] object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
-          ) : adSettings.mediaType === 'video' && adSettings.mediaUrl ? (
-            <div className="aspect-[21/9] md:aspect-[32/9] w-full overflow-hidden bg-black">
-              <video src={adSettings.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-            </div>
-          ) : adSettings.titleText ? (
-            <div className="py-8 md:py-16 px-6 text-center bg-gradient-to-br from-red-50 via-white to-blue-50">
-              <h4 className="text-xl md:text-4xl font-black text-slate-800 group-hover:text-red-700 transition-colors transform group-hover:scale-105 duration-500">{adSettings.titleText}</h4>
-              <p className="text-slate-400 text-[10px] mt-3 font-black uppercase tracking-[0.3em]">DRISHTI KHABAR AD NETWORK</p>
-            </div>
-          ) : null}
+    if (isCustomAdConfigured) {
+      return (
+        <div className="mb-10 group">
+          <Link to={adSettings.adLink || '/advertisement-rates'} className="block overflow-hidden rounded-2xl shadow-lg border border-slate-100 bg-slate-50 relative">
+            <div className="absolute top-2 right-2 bg-black/20 text-white text-[8px] px-1.5 py-0.5 rounded font-black z-10 backdrop-blur-sm tracking-widest">{label}</div>
+            {adSettings.mediaType === 'image' && adSettings.mediaUrl ? (
+              <img src={adSettings.mediaUrl} alt="Advertisement" className="w-full h-auto max-h-[120px] md:max-h-[250px] object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+            ) : adSettings.mediaType === 'video' && adSettings.mediaUrl ? (
+              <div className="aspect-[21/9] md:aspect-[32/9] w-full overflow-hidden bg-black">
+                <video src={adSettings.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+              </div>
+            ) : adSettings.titleText ? (
+              <div className="py-8 md:py-16 px-6 text-center bg-gradient-to-br from-red-50 via-white to-blue-50">
+                <h4 className="text-xl md:text-4xl font-black text-slate-800 group-hover:text-red-700 transition-colors transform group-hover:scale-105 duration-500">{adSettings.titleText}</h4>
+                <p className="text-slate-400 text-[10px] mt-3 font-black uppercase tracking-[0.3em]">DRISHTI KHABAR AD NETWORK</p>
+              </div>
+            ) : null}
+          </Link>
+        </div>
+      );
+    } else if (adsenseCode) {
+      // Render AdSense if no custom ad is configured and AdSense code is available
+      return (
+        <div className="mb-10 p-4 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden text-center min-h-[100px] flex items-center justify-center">
+           <div dangerouslySetInnerHTML={{ __html: adsenseCode }} />
+        </div>
+      );
+    } else {
+      // Fallback to default "ADVERTISEMENT" message if neither custom nor AdSense is available
+      return (
+        <Link to="/advertisement-rates" className="hidden lg:flex flex-1 max-w-2xl mx-auto h-24 items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded-xl hover:bg-slate-100 transition-colors group">
+          <div className="text-center">
+            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em] mb-1">ADVERTISEMENT</p>
+            <p className="text-slate-400 font-bold text-xs group-hover:text-red-700">हाम्रो पोर्टलमा विज्ञापनको लागि यहाँ क्लिक गर्नुहोस्</p>
+          </div>
         </Link>
-      </div>
-    );
+      );
+    }
   };
 
   if (loading) {

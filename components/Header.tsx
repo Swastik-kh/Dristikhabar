@@ -13,6 +13,7 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
   const [bsDate, setBsDate] = useState(getCurrentNepaliDate());
   const [siteLogo, setSiteLogo] = useState<string>(logo || localStorage.getItem('drishti_site_logo') || 'logo.png');
   const [topAd, setTopAd] = useState<any>(null);
+  const [adsenseCode, setAdsenseCode] = useState<string>(''); // Added adsenseCode state
   const [isSticky, setIsSticky] = useState(false);
   const location = useLocation();
 
@@ -21,11 +22,14 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
     
     const fetchSettings = async () => {
       const settings = await settingsService.getSettings();
-      if (settings && settings.topAd) {
-        setTopAd(settings.topAd);
+      if (settings) {
+        if (settings.topAd) setTopAd(settings.topAd);
+        if (settings.adsenseCode) setAdsenseCode(settings.adsenseCode); // Fetch adsenseCode
       } else {
         const savedTop = localStorage.getItem('drishti_top_ad');
+        const savedAdsense = localStorage.getItem('drishti_adsense_code'); // Fetch from localStorage
         if (savedTop) setTopAd(JSON.parse(savedTop));
+        if (savedAdsense) setAdsenseCode(savedAdsense);
       }
     };
     fetchSettings();
@@ -45,10 +49,50 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
     };
   }, []);
 
+  // Execute AdSense script if code is present and relevant ad config changes
+  useEffect(() => {
+    if (adsenseCode) {
+      try {
+        // This ensures the ad slot is refreshed.
+        // The main adsbygoogle.js script must be loaded in index.html for this to work.
+        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+        (window as any).adsbygoogle.push({});
+      } catch (e) {
+        console.warn("Failed to push to adsbygoogle from Header:", e);
+      }
+    }
+  }, [adsenseCode, topAd]); // Rerun if adsenseCode or topAd settings change
+
   const isActive = (path: string) => location.pathname === path;
 
   const renderHeaderAd = () => {
-    if (!topAd || (!topAd.mediaUrl && !topAd.titleText)) {
+    // Prioritize custom ad banner
+    if (topAd && (topAd.mediaUrl || (topAd.titleText && topAd.titleText.trim() !== ''))) {
+      return (
+        <Link to={topAd.adLink || '/advertisement-rates'} className="hidden md:block flex-1 max-w-2xl mx-auto h-24 overflow-hidden rounded-xl border border-slate-100 relative group">
+          <div className="absolute top-1 right-2 text-[8px] font-black text-white/50 z-10 uppercase tracking-widest">Sponsored</div>
+          {topAd.mediaType === 'image' && topAd.mediaUrl ? (
+            <img src={topAd.mediaUrl} alt="Ad" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+          ) : topAd.mediaType === 'video' && topAd.mediaUrl ? (
+            <video src={topAd.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-slate-900 flex items-center justify-center p-4">
+              <p className="text-white font-black text-lg text-center line-clamp-1">{topAd.titleText}</p>
+            </div>
+          )}
+        </Link>
+      );
+    } 
+    // If no custom ad, try to render AdSense if code is available
+    else if (adsenseCode) {
+      return (
+        <div className="hidden md:flex flex-1 max-w-2xl mx-auto h-24 items-center justify-center bg-white rounded-xl border border-slate-100 overflow-hidden text-center min-h-[96px]">
+          <div dangerouslySetInnerHTML={{ __html: adsenseCode }} />
+        </div>
+      );
+    }
+    // Fallback if neither custom nor AdSense is available
+    else {
       return (
         <Link to="/advertisement-rates" className="hidden lg:flex flex-1 max-w-2xl mx-auto h-24 items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded-xl hover:bg-slate-100 transition-colors group">
           <div className="text-center">
@@ -58,21 +102,6 @@ const Header: React.FC<HeaderProps> = ({ logo }) => {
         </Link>
       );
     }
-
-    return (
-      <Link to={topAd.adLink || '/advertisement-rates'} className="hidden md:block flex-1 max-w-2xl mx-auto h-24 overflow-hidden rounded-xl border border-slate-100 relative group">
-        <div className="absolute top-1 right-2 text-[8px] font-black text-white/50 z-10 uppercase tracking-widest">Sponsored</div>
-        {topAd.mediaType === 'image' && topAd.mediaUrl ? (
-          <img src={topAd.mediaUrl} alt="Ad" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-        ) : topAd.mediaType === 'video' && topAd.mediaUrl ? (
-          <video src={topAd.mediaUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-slate-900 flex items-center justify-center p-4">
-            <p className="text-white font-black text-lg text-center line-clamp-1">{topAd.titleText}</p>
-          </div>
-        )}
-      </Link>
-    );
   };
 
   return (
