@@ -11,6 +11,7 @@ interface Props {
 
 const NewsCard: React.FC<Props> = ({ news, horizontal = false }) => {
   const shouldShowAuthorName = news.showAuthorName === undefined ? true : news.showAuthorName;
+  // Prefer slug for clean URLs, fallback to ID if slug is not available
   const shareUrl = `${window.location.origin}/news/${news.slug || news.id}`; // Clean URL for external sharing
   const displayLink = `/news/${news.slug || news.id}`; // For internal react-router navigation (will be redirected by index.html script)
 

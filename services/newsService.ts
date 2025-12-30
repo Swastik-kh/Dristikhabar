@@ -69,12 +69,14 @@ export const newsService = {
 
   async getNewsByIdOrSlug(identifier: string) {
     const db = getDb();
-    if (!db) return null;
+    if (!db) {
+        throw new Error("डेटाबेस जडान हुन सकेन। कृपया एकछिन पर्खेर पुन: प्रयास गर्नुहोस्।");
+    }
 
     let newsItem: NewsItem | null = null;
     let docRef = null;
 
-    // 1. First try by Document ID
+    // 1. First try by Document ID (this will match if identifier is an actual Firestore document ID)
     try {
       docRef = doc(db, COLLECTION_NEWS, identifier);
       const snap = await getDoc(docRef);
@@ -82,21 +84,26 @@ export const newsService = {
         newsItem = { id: snap.id, ...snap.data() } as NewsItem;
       }
     } catch (e) {
-      // Not a valid ID format or other error, proceed to slug search
-      console.warn("Attempt to get news by ID failed:", e);
+      // Log warning but don't re-throw, continue to slug search
+      console.warn(`Attempt to get news by ID '${identifier}' failed (possibly not an ID format):`, e);
     }
 
     // 2. If not found by ID, try by Slug
     if (!newsItem) {
-      const q = query(
-        collection(db, COLLECTION_NEWS),
-        where("slug", "==", identifier),
-        firestoreLimit(1)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        docRef = doc(db, COLLECTION_NEWS, querySnapshot.docs[0].id);
-        newsItem = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as NewsItem;
+      try {
+        const q = query(
+          collection(db, COLLECTION_NEWS),
+          where("slug", "==", identifier),
+          firestoreLimit(1)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          docRef = doc(db, COLLECTION_NEWS, querySnapshot.docs[0].id);
+          newsItem = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as NewsItem;
+        }
+      } catch (e: any) {
+        console.error(`Error querying news by slug '${identifier}':`, e);
+        throw new Error(`स्लग मार्फत समाचार खोज्दा त्रुटि भयो: ${e.message}`);
       }
     }
 
@@ -119,12 +126,8 @@ export const newsService = {
       return newsItem;
     }
     
-    // If newsItem is still null at this point
-    if (!newsItem) {
-      throw new Error("समाचार फेला परेन।");
-    }
-
-    return null; // Should not reach here
+    // If newsItem is still null after both attempts, throw a specific error
+    throw new Error(`समाचार '${identifier}' फेला परेन।`);
   },
 
   async getNewsById(id: string) {

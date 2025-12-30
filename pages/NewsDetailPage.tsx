@@ -40,10 +40,22 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
     } else if (id) {
       const fetchNews = async () => {
         try {
-          const item = await newsService.getNewsByIdOrSlug(id);
+          // Robustly extract the actual slug from the URL parameter
+          // `id` can be like "news/some-slug" if coming from a clean URL before redirect,
+          // or just "some-slug" after client-side redirect.
+          let actualSlugOrId = id;
+          if (id.startsWith('news/')) {
+            actualSlugOrId = id.substring(id.indexOf('/') + 1);
+          } else if (id.startsWith('category/')) { // Handle category paths if they ever end up here
+            actualSlugOrId = id.substring(id.indexOf('/') + 1);
+          }
+
+          const item = await newsService.getNewsByIdOrSlug(actualSlugOrId);
           if (item) {
             setNews(item);
             document.title = `${item.title} - ${APP_NAME}`;
+          } else {
+            setError("समाचार फेला परेन।"); // Explicitly set error if item is null (should not happen with service's throw)
           }
         } catch (err: any) {
           console.error(err);
@@ -146,6 +158,7 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
   };
 
   const authorName = news.showAuthorName && news.authorName ? news.authorName : "";
+  // Prefer slug for clean URLs, fallback to ID if slug is not available
   const shareUrl = `${window.location.origin}/news/${news.slug || news.id}`; // Clean URL for external sharing
 
   return (

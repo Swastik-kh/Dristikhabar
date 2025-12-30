@@ -44,55 +44,48 @@
     <div id="root"></div>
     <script type="text/javascript">
       // Client-side redirect for clean URLs to hash URLs (for HashRouter apps)
+      // This script runs BEFORE the React app mounts, ensuring consistent URL handling.
       (function() {
         const path = window.location.pathname;
         const search = window.location.search;
         const currentHash = window.location.hash;
 
-        // List of paths that should be handled by React Router with a hash
-        const hashRoutedPaths = [
-          '/news/', // For individual news slugs
-          '/category/', // For category pages
+        // Paths that should be handled by React Router with a hash
+        // Any path starting with these prefixes (excluding '/') should be redirected.
+        const hashRoutedPathPrefixes = [
+          '/news/',
+          '/category/',
           '/advertisement-rates',
           '/about-us',
           '/contact-us',
           '/privacy-policy',
           '/disclaimer',
-          '/admin' // For admin panel routes
+          '/admin'
         ];
 
         let shouldRedirect = false;
         let targetHashPath = '';
 
-        // Check if the current pathname matches any of our hash-routed paths
-        for (const routePrefix of hashRoutedPaths) {
-          if (path.startsWith(routePrefix)) {
+        // Check for specific clean paths that should become hash paths
+        if (path === '/') {
+          if (currentHash === '') { // If on root with no hash, redirect to hash root
             shouldRedirect = true;
-            targetHashPath = '#' + path;
-            break;
+            targetHashPath = '#/';
           }
-          // Special case for root path if we want to ensure it's /#/ or just #/
-          if (path === '/' && routePrefix === '/category/') { // Home page case
-            if (currentHash === '' || currentHash === '#/') {
-              // No need to redirect if already on root or hash root
-            } else {
+        } else {
+          for (const routePrefix of hashRoutedPathPrefixes) {
+            if (path.startsWith(routePrefix)) {
               shouldRedirect = true;
-              targetHashPath = '#/';
+              targetHashPath = '#' + path; // E.g., /news/slug -> #/news/slug
+              break;
             }
           }
         }
-        
-        // Also handle the root path redirection explicitly if it's a clean URL to hash root
-        if (path === '/' && currentHash === '') {
-          shouldRedirect = true;
-          targetHashPath = '#/';
-        }
 
-
-        // Perform redirect if necessary
+        // Perform redirect if a clean URL is detected and it's not already a hash URL
         if (shouldRedirect && currentHash !== targetHashPath) {
           const newUrl = window.location.origin + targetHashPath + search;
-          window.location.replace(newUrl);
+          window.location.replace(newUrl); // Use replace to avoid polluting history
         }
       })();
     </script>
