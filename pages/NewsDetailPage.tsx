@@ -4,22 +4,19 @@ import { useParams } from 'react-router-dom';
 import { NewsItem } from '../types';
 import { getRelativeTime } from '../utils/nepaliDate';
 import { newsService } from '../services/newsService';
-// Fix: Corrected import statement for settingsService and added missing APP_NAME import
 import { settingsService } from '../services/settingsService';
 import { APP_NAME } from '../constants';
 
-// Fix: Added interface for props to correctly type `previewData`
 interface NewsDetailPageProps {
   previewData?: Partial<NewsItem> | null;
 }
 
-// Fix: Corrected component definition to properly accept `previewData` as a prop
 const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
   const { id } = useParams();
   const [news, setNews] = useState<Partial<NewsItem> | null>(null);
   const [loading, setLoading] = useState(!previewData);
   const [adsenseCode, setAdsenseCode] = useState<string>('');
-  const [error, setError] = useState<string | null>(null); // New state for error
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -28,7 +25,6 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
         if (settings?.adsenseCode) setAdsenseCode(settings.adsenseCode);
       } catch (err: any) {
         console.error("Failed to fetch settings for NewsDetailPage:", err);
-        // Optionally set a non-blocking error for settings if critical
       }
     };
     fetchSettings();
@@ -46,8 +42,16 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
           let actualSlugOrId = id;
           if (id.startsWith('news/')) {
             actualSlugOrId = id.substring(id.indexOf('/') + 1);
-          } else if (id.startsWith('category/')) { // Handle category paths if they ever end up here
+          } else if (id.startsWith('category/')) {
             actualSlugOrId = id.substring(id.indexOf('/') + 1);
+          }
+
+          // CRITICAL FIX: Remove any query parameters (like ?fbclid=...)
+          // that might be appended to the slug by HashRouter when a clean URL with search params
+          // is redirected to #/path?search. useParams() might capture "slug?param=x" as :id.
+          const queryParamIndex = actualSlugOrId.indexOf('?');
+          if (queryParamIndex !== -1) {
+            actualSlugOrId = actualSlugOrId.substring(0, queryParamIndex);
           }
 
           const item = await newsService.getNewsByIdOrSlug(actualSlugOrId);
@@ -55,11 +59,11 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
             setNews(item);
             document.title = `${item.title} - ${APP_NAME}`;
           } else {
-            setError("समाचार फेला परेन।"); // Explicitly set error if item is null (should not happen with service's throw)
+            setError("समाचार फेला परेन।");
           }
         } catch (err: any) {
           console.error(err);
-          setError(err.message || "समाचार लोड गर्न सकेन।"); // Set error message
+          setError(err.message || "समाचार लोड गर्न सकेन।");
         } finally {
           setLoading(false);
         }
@@ -68,11 +72,9 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
     }
   }, [id, previewData]);
 
-  // Execute AdSense script if code is present and component mounts/updates
   useEffect(() => {
     if (adsenseCode) {
       try {
-        // Ensure that adsbygoogle.js is loaded from index.html
         (window as any).adsbygoogle = (window as any).adsbygoogle || [];
         (window as any).adsbygoogle.push({});
       } catch (e) {
@@ -158,8 +160,7 @@ const NewsDetailPage: React.FC<NewsDetailPageProps> = ({ previewData }) => {
   };
 
   const authorName = news.showAuthorName && news.authorName ? news.authorName : "";
-  // Prefer slug for clean URLs, fallback to ID if slug is not available
-  const shareUrl = `${window.location.origin}/news/${news.slug || news.id}`; // Clean URL for external sharing
+  const shareUrl = `${window.location.origin}/news/${news.slug || news.id}`;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl font-mukta">
