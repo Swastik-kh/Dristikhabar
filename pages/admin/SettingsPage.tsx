@@ -65,9 +65,9 @@ const SettingsPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const limit = target === 'logo' ? 500000 : 1000000;
+    const limit = target === 'logo' ? 500000 : 2000000; // Increased limit for videos
     if (file.size > limit) {
-      alert("फाइल धेरै ठूलो भयो। कृपया १ MB भन्दा सानो फाइल प्रयोग गर्नुहोस्।");
+      alert("फाइल धेरै ठूलो भयो। कृपया सानो साइजको फाइल प्रयोग गर्नुहोस्।");
       return;
     }
 
@@ -81,7 +81,8 @@ const SettingsPage: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleClearAd = (target: 'top' | 'bottom') => {
+  const handleClearFullAd = (target: 'top' | 'bottom') => {
+    if (!window.confirm("के तपाईं यो विज्ञापनका सबै विवरणहरू (फोटो, भिडियो, शीर्षक र लिङ्क) हटाउन चाहनुहुन्छ?")) return;
     const emptyAd: AdConfig = {
       mediaType: 'text',
       titleText: '',
@@ -90,6 +91,11 @@ const SettingsPage: React.FC = () => {
     };
     if (target === 'top') setTopAd(emptyAd);
     else setBottomAd(emptyAd);
+  };
+
+  const handleRemoveMedia = (target: 'top' | 'bottom') => {
+    if (target === 'top') setTopAd({ ...topAd, mediaUrl: '', mediaType: 'text' });
+    else setBottomAd({ ...bottomAd, mediaUrl: '', mediaType: 'text' });
   };
 
   const handleSave = async () => {
@@ -127,9 +133,9 @@ const SettingsPage: React.FC = () => {
 
   const renderAdSection = (title: string, config: AdConfig, setConfig: (c: AdConfig) => void, fileRef: React.RefObject<HTMLInputElement>, target: 'top' | 'bottom') => (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-      <div className="p-6 border-b bg-slate-50 flex justify-between items-center">
+      <div className="p-6 border-b bg-slate-50 flex flex-wrap justify-between items-center gap-4">
         <h3 className="font-black text-slate-800 uppercase tracking-wider text-sm">{title}</h3>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {['text', 'image', 'video'].map((type) => (
             <button
               key={type}
@@ -140,58 +146,93 @@ const SettingsPage: React.FC = () => {
             </button>
           ))}
           <button 
-            onClick={() => handleClearAd(target)}
-            className="ml-4 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-800 text-white hover:bg-red-700 transition-colors"
+            onClick={() => handleClearFullAd(target)}
+            className="ml-4 px-3 py-1 rounded-full text-[10px] font-black uppercase bg-red-700/10 text-red-700 hover:bg-red-700 hover:text-white transition-all border border-red-200"
+            title="सम्पूर्ण विज्ञापन हटाउनुहोस्"
           >
-            खाली गर्नुहोस्
+            सबै हटाउनुहोस्
           </button>
         </div>
       </div>
       
-      <div className="p-8 space-y-6">
+      <div className="p-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">विज्ञापनको शीर्षक</label>
-            <input 
-              type="text" 
-              value={config.titleText}
-              onChange={(e) => setConfig({ ...config, titleText: e.target.value })}
-              className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold"
-              placeholder="शीर्षक"
-            />
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">विज्ञापनको शीर्षक (Title)</label>
+            <div className="relative">
+              <input 
+                type="text" 
+                value={config.titleText}
+                onChange={(e) => setConfig({ ...config, titleText: e.target.value })}
+                className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold"
+                placeholder="शीर्षक यहाँ लेख्नुहोस्..."
+              />
+              {config.titleText && (
+                <button onClick={() => setConfig({...config, titleText: ''})} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-500">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">लिङ्क (URL)</label>
-            <input 
-              type="text" 
-              value={config.adLink}
-              onChange={(e) => setConfig({ ...config, adLink: e.target.value })}
-              className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold"
-              placeholder="/advertisement-rates"
-            />
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">विज्ञापन लिङ्क (URL)</label>
+            <div className="relative">
+              <input 
+                type="text" 
+                value={config.adLink}
+                onChange={(e) => setConfig({ ...config, adLink: e.target.value })}
+                className="w-full border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 font-bold"
+                placeholder="/advertisement-rates"
+              />
+              {config.adLink && config.adLink !== '/advertisement-rates' && (
+                <button onClick={() => setConfig({...config, adLink: '/advertisement-rates'})} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-500">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">मीडिया लिङ्क (Photo/Video URL)</label>
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">विज्ञापन मिडिया (Photo/Video)</label>
+            {config.mediaUrl && (
+              <button onClick={() => handleRemoveMedia(target)} className="text-[10px] font-black text-red-600 hover:underline uppercase tracking-tighter flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                मिडिया हटाउनुहोस्
+              </button>
+            )}
+          </div>
+          
           <div className="flex flex-col md:flex-row gap-4">
             <input 
               type="text" 
-              value={config.mediaUrl.startsWith('data:') ? '' : config.mediaUrl}
+              value={config.mediaUrl.startsWith('data:') ? 'Uploaded File' : config.mediaUrl}
               onChange={(e) => setConfig({ ...config, mediaUrl: e.target.value })}
               className="flex-1 border-2 border-slate-100 p-4 rounded-2xl focus:border-red-700 outline-none bg-slate-50 text-sm font-mono"
-              placeholder="https://example.com/banner.jpg"
+              placeholder="मिडियाको लिङ्क यहाँ राख्नुहोस् वा अपलोड गर्नुहोस्..."
             />
             <div className="shrink-0 flex items-center gap-2">
               <input type="file" ref={fileRef} className="hidden" accept={config.mediaType === 'video' ? 'video/*' : 'image/*'} onChange={(e) => handleFileUpload(e, target)} />
               <button 
                 onClick={() => fileRef.current?.click()}
-                className="bg-slate-800 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-900 transition-all flex items-center gap-2"
+                className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-900 transition-all flex items-center gap-2"
               >
-                अपलोड
+                अपलोड गर्नुहोस्
               </button>
             </div>
           </div>
+
+          {config.mediaUrl && (
+            <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 max-w-md">
+              <p className="text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">PREVIEW:</p>
+              {config.mediaType === 'video' || config.mediaUrl.includes('video') || config.mediaUrl.startsWith('data:video') ? (
+                <video src={config.mediaUrl} className="w-full h-auto rounded-lg shadow-sm" controls muted />
+              ) : (
+                <img src={config.mediaUrl} className="w-full h-auto rounded-lg shadow-sm" alt="Ad Preview" onError={(e) => (e.currentTarget.style.display = 'none')} />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -202,7 +243,7 @@ const SettingsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tight">वेबसाइट सेटिङ्गहरू</h2>
-          <p className="text-slate-500 text-sm font-bold">लोगो, विज्ञापन र मोबाइल एपको विवरण यहाँबाट अपडेट गर्नुहोस्।</p>
+          <p className="text-slate-500 text-sm font-bold">लोगो, विज्ञापन, सामाजिक सञ्जाल र मोबाइल एपको विवरण व्यवस्थापन।</p>
         </div>
         <button 
           onClick={handleSave} 
@@ -231,10 +272,15 @@ const SettingsPage: React.FC = () => {
           <h3 className="text-xl font-black text-slate-800">वेबसाइट लोगो</h3>
           <div className="flex gap-4">
             <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'logo')} />
-            <button onClick={() => logoInputRef.current?.click()} className="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-slate-200">फोटो रोज्नुहोस्</button>
-            <button onClick={() => setLogo('')} className="text-red-500 text-[10px] font-black uppercase hover:underline">हटाउनुहोस्</button>
+            <button onClick={() => logoInputRef.current?.click()} className="bg-slate-100 text-slate-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-slate-200 transition-colors">फोटो रोज्नुहोस्</button>
+            <button onClick={() => { if(window.confirm('के तपाईं लोगो हटाउन चाहनुहुन्छ?')) setLogo(''); }} className="text-red-500 text-[10px] font-black uppercase hover:underline">हटाउनुहोस्</button>
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-8">
+        {renderAdSection('माथिल्लो विज्ञापन (Top Banner)', topAd, setTopAd, topAdFileRef, 'top')}
+        {renderAdSection('तल्लो विज्ञापन (Bottom Banner)', bottomAd, setBottomAd, bottomAdFileRef, 'bottom')}
       </div>
 
       {/* Social Links Section */}
@@ -321,11 +367,6 @@ const SettingsPage: React.FC = () => {
             placeholder="दरहरू यहाँ लेख्नुहोस्..."
           ></textarea>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-8">
-        {renderAdSection('माथिल्लो विज्ञापन', topAd, setTopAd, topAdFileRef, 'top')}
-        {renderAdSection('तल्लो विज्ञापन', bottomAd, setBottomAd, bottomAdFileRef, 'bottom')}
       </div>
     </div>
   );

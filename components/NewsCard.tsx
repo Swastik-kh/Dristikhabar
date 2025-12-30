@@ -2,6 +2,7 @@
 import React from 'react';
 import { NewsItem } from '../types';
 import { Link } from 'react-router-dom';
+import { getRelativeTime } from '../utils/nepaliDate';
 
 interface Props {
   news: NewsItem;
@@ -21,8 +22,11 @@ const NewsCard: React.FC<Props> = ({ news, horizontal = false }) => {
   };
 
   const thumbnail = getThumbnail();
+  
+  // Logic: Only show the author name if enabled, otherwise just the icon will represent the source
+  const authorName = shouldShowAuthorName && news.authorName ? news.authorName : "";
+  const publishedDate = getRelativeTime(news.publishedAt);
 
-  // Primary list style as requested (Image on right, text on left)
   return (
     <div className="group py-8 border-b border-slate-100 last:border-0">
       <div className="flex flex-col md:flex-row gap-6 md:gap-10">
@@ -34,11 +38,22 @@ const NewsCard: React.FC<Props> = ({ news, horizontal = false }) => {
             </h2>
           </Link>
 
-          {shouldShowAuthorName && news.authorName && (
-            <p className="text-slate-400 text-sm font-bold mb-3 flex items-center gap-1">
-              {news.authorName}
-            </p>
-          )}
+          {/* Author and Date Meta Info */}
+          <div className="flex items-center gap-3 mb-3 text-slate-400 text-sm font-bold">
+            <span className="flex items-center gap-1.5 text-slate-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              {authorName}
+            </span>
+            <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+            <span className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {publishedDate}
+            </span>
+          </div>
 
           <Link to={newsLink} className="block">
             <p className="text-slate-600 text-base md:text-lg font-medium leading-relaxed line-clamp-3 mb-6">
@@ -46,7 +61,7 @@ const NewsCard: React.FC<Props> = ({ news, horizontal = false }) => {
             </p>
           </Link>
 
-          {/* Action Icons like in the reference image */}
+          {/* Action Icons */}
           <div className="flex items-center gap-6 text-slate-500">
             <button className="flex items-center gap-2 hover:text-red-700 transition-colors group/action">
               <svg className="w-5 h-5 group-hover/action:fill-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">

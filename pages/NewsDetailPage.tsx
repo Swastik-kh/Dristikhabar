@@ -108,6 +108,8 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
     return null;
   };
 
+  const authorName = news.showAuthorName && news.authorName ? news.authorName : "";
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl font-mukta">
       <div className="mb-10">
@@ -123,17 +125,16 @@ const NewsDetailPage: React.FC<{ previewData?: Partial<NewsItem> }> = ({ preview
         </h1>
         
         <div className="flex flex-wrap items-center gap-6 text-slate-400 text-sm border-y border-slate-100 py-6 mb-10">
-          {news.showAuthorName && news.authorName && (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-xs">
-                {news.authorName.charAt(0)}
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase text-slate-400 leading-none">सम्वाददाता</p>
-                <p className="text-slate-900 font-black">{news.authorName}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732" />
+              </svg>
             </div>
-          )}
+            <div>
+              <p className="text-slate-900 font-black text-lg">{authorName || "दृष्टि संवाददाता"}</p>
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span className="font-bold">{news.publishedAt ? getRelativeTime(news.publishedAt) : 'भर्खरै'}</span>

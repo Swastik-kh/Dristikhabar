@@ -30,6 +30,7 @@ const AdminLayout: React.FC = () => {
   }, [navigate]);
 
   const handleLogout = async () => {
+    if (!window.confirm("के तपाईं बाहिर निस्कन चाहनुहुन्छ?")) return;
     try {
       await signOut(getAuth());
       localStorage.removeItem('drishti_user');
@@ -47,7 +48,7 @@ const AdminLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex font-mukta">
       <aside className="w-64 bg-slate-900 text-white p-6 flex flex-col shadow-xl z-20 shrink-0">
-        <div className="mb-10 text-center">
+        <div className="mb-6 text-center">
           <Link to="/">
             <img src={siteLogo} alt="Logo" className="h-12 mx-auto brightness-0 invert object-contain" />
           </Link>
@@ -57,6 +58,19 @@ const AdminLayout: React.FC = () => {
              </span>
           </div>
           <div className="mt-2 text-xs font-bold text-slate-400 line-clamp-1">{user.name}</div>
+        </div>
+        
+        {/* Logout Button Moved to Top */}
+        <div className="mb-8 pb-6 border-b border-slate-800">
+          <button 
+            onClick={handleLogout} 
+            className="w-full flex items-center justify-center gap-3 p-3 bg-red-900/20 border border-red-900/30 rounded-xl hover:bg-red-700 transition-all text-red-400 hover:text-white font-black text-xs uppercase tracking-widest"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            बाहिर निस्कनुहोस्
+          </button>
         </div>
         
         <nav className="flex-1 space-y-1.5 font-bold text-sm">
@@ -86,13 +100,6 @@ const AdminLayout: React.FC = () => {
             </>
           )}
         </nav>
-        
-        <div className="mt-auto pt-6 border-t border-slate-800">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 bg-slate-800 rounded-xl hover:bg-red-900 transition-colors text-slate-300 hover:text-white font-bold text-sm">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            बाहिर निस्कनुहोस्
-          </button>
-        </div>
       </aside>
       <main className="flex-1 p-8 overflow-y-auto">
         <Outlet />
