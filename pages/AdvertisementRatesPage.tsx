@@ -66,7 +66,7 @@ const AdvertisementRatesPage: React.FC = () => {
             <p className="text-slate-400 font-bold">हाम्रो बजार विभागसँग सिधै कुरा गर्नुहोस्।</p>
          </div>
          <div className="flex flex-col sm:flex-row gap-4">
-            <a href="mailto:marketing@drishtikhabar.com" className="bg-red-700 hover:bg-red-800 px-8 py-4 rounded-2xl font-black transition-all text-center">इमेल पठाउनुहोस्</a>
+            <a href="mailto:marketing@dristikhabar.com" className="bg-red-700 hover:bg-red-800 px-8 py-4 rounded-2xl font-black transition-all text-center">इमेल पठाउनुहोस्</a>
             <a href="tel:9800000000" className="bg-slate-800 hover:bg-slate-700 px-8 py-4 rounded-2xl font-black transition-all border border-slate-700 text-center">फोन गर्नुहोस्</a>
          </div>
       </div>

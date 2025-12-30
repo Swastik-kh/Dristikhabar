@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { getAuth, signOut, onAuthStateChanged } from '../../services/firebase';
+// Removed Firebase Auth imports as custom login is used
+// import { getAuth, signOut, onAuthStateChanged } from '../../services/firebase'; 
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
@@ -13,35 +14,37 @@ const AdminLayout: React.FC = () => {
     const savedUser = localStorage.getItem('drishti_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
+    } else {
+      // If no user in localStorage, redirect to login
+      navigate('/admin/login');
     }
 
-    const unsubscribe = onAuthStateChanged(getAuth(), (firebaseUser) => {
-      if (!firebaseUser && !localStorage.getItem('drishti_user')) {
-        navigate('/admin/login');
-      }
-    });
+    // Removed Firebase onAuthStateChanged listener as custom localStorage auth is used
+    // const unsubscribe = onAuthStateChanged(getAuth(), (firebaseUser) => {
+    //   if (!firebaseUser && !localStorage.getItem('drishti_user')) {
+    //     navigate('/admin/login');
+    //   }
+    // });
 
     const savedLogo = localStorage.getItem('drishti_site_logo');
     if (savedLogo) {
       setSiteLogo(savedLogo);
     }
 
-    return () => unsubscribe();
+    // No unsubscribe needed if onAuthStateChanged listener is removed
+    // return () => unsubscribe();
   }, [navigate]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => { // Made synchronous as no async Firebase call
     if (!window.confirm("के तपाईं बाहिर निस्कन चाहनुहुन्छ?")) return;
-    try {
-      await signOut(getAuth());
-      localStorage.removeItem('drishti_user');
-      navigate('/admin/login');
-    } catch (err) {
-      localStorage.removeItem('drishti_user');
-      navigate('/admin/login');
-    }
+    
+    // No need to call Firebase signOut as custom login is used
+    // If the login was custom (not Firebase Auth), Firebase signOut won't do anything relevant for the app's state.
+    localStorage.removeItem('drishti_user'); // Clear local user session
+    navigate('/admin/login'); // Redirect to login page
   };
 
-  if (!user) return null;
+  if (!user) return null; // If user is null (e.g., localStorage was cleared), this will block rendering
 
   const isMainEditor = user.role === 'pradhan-sampadak';
 

@@ -25,10 +25,7 @@ const ContactUsPage: React.FC = () => {
           <h2>हाम्रो कार्यालय</h2>
           <p>
             <strong>ठेगाना:</strong> काठमाडौं, नेपाल <br/>
-            <strong>फोन:</strong> +९७७-१-XXXXXXX (कार्यालय समयमा) <br/>
-            <strong>मोबाइल:</strong> +९७७-९८XXXXXXXX (२४/७) <br/>
-            <strong>इमेल:</strong> info@drishtikhabar.com <br/>
-            <strong>विज्ञापनका लागि:</strong> marketing@drishtikhabar.com
+            <strong>इमेल:</strong> <a href="mailto:info@dristikhabar.com" className="text-blue-600 hover:underline">info@dristikhabar.com</a>
           </p>
 
           <h2>कार्यालय समय</h2>
@@ -41,9 +38,9 @@ const ContactUsPage: React.FC = () => {
           <p>
             नवीनतम समाचार र अपडेटहरूका लागि हाम्रो सामाजिक सञ्जाल पृष्ठहरूमा हामीलाई पछ्याउनुहोस्।
             <br/>
-            <a href="https://www.facebook.com/drishtikhabar" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">फेसबुक</a> | 
-            <a href="https://twitter.com/drishtikhabar" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">ट्वीटर (X)</a> | 
-            <a href="https://www.youtube.com/drishtikhabar" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">युट्यूब</a>
+            <a href="https://www.facebook.com/dristikhabar" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">फेसबुक</a> | 
+            <a href="https://twitter.com/dristikhabar" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">ट्वीटर (X)</a> | 
+            <a href="https://www.youtube.com/dristikhabar" target="_blank" rel="noopener noreferrer" className="text-red-600 hover:underline">युट्यूब</a>
           </p>
 
           <h3>प्रतिक्रिया फारम (छिट्टै आउँदैछ)</h3>

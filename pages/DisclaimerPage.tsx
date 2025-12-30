@@ -67,7 +67,7 @@ const DisclaimerPage: React.FC = () => {
 
           <h2>६. सम्पर्क गर्नुहोस्</h2>
           <p>
-            यदि तपाईंलाई यी अस्वीकरण र सर्तहरू बारे कुनै प्रश्नहरू छन् भने, कृपया हामीलाई सम्पर्क गर्नुहोस्: <a href="mailto:info@drishtikhabar.com" className="text-blue-600 hover:underline">info@drishtikhabar.com</a>
+            यदि तपाईंलाई यी अस्वीकरण र सर्तहरू बारे कुनै प्रश्नहरू छन् भने, कृपया हामीलाई सम्पर्क गर्नुहोस्: <a href="mailto:info@dristikhabar.com" className="text-blue-600 hover:underline">info@dristikhabar.com</a>
           </p>
         </div>
       </div>
